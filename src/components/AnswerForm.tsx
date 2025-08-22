@@ -1,9 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import AnimatedContent from "./ui/AnimatedContent";
 
-export default function AnswerForm() {
+interface AnswerFormProps {
+  onScoreUpdate?: (score: number) => void;
+}
+
+export default function AnswerForm({ onScoreUpdate }: AnswerFormProps) {
   const [answer, setAnswer] = useState("");
+  const [score, setScore] = useState<number | null>(null);
+  const [showScore, setShowScore] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     if (e.target.value.length <= 1000) {
@@ -16,8 +23,22 @@ export default function AnswerForm() {
     }
   };
 
+  const handleSubmit = () => {
+    if (answer.trim()) {
+      // 랜덤 점수 생성 (50-100점)
+      const randomScore = Math.floor(Math.random() * 51) + 50;
+      setScore(randomScore);
+      setShowScore(true);
+
+      // 부모 컴포넌트에 점수 전달
+      if (onScoreUpdate) {
+        onScoreUpdate(randomScore);
+      }
+    }
+  };
+
   return (
-    <div className="fixed bottom-16 left-0 right-0 max-w-md mx-auto p-4 bg-white border-t border-gray-200 z-10">
+    <div className="fixed bottom-16 left-0 right-0 max-w-md mx-auto p-4 bg-stone-50 border-t border-gray-200 z-10">
       <div className="bg-white border border-gray-200 rounded-2xl">
         <textarea
           value={answer}
@@ -34,7 +55,10 @@ export default function AnswerForm() {
           <div className="text-xs text-gray-500">
             {answer.length > 0 ? `${answer.length}자` : "최대 1000자"}
           </div>
-          <button className="bg-slate-700 hover:bg-slate-800 text-white px-6 py-2.5 rounded-xl font-medium text-sm transition-colors">
+          <button
+            onClick={handleSubmit}
+            className="bg-slate-700 hover:bg-slate-800 text-white px-6 py-2.5 rounded-xl font-medium text-sm transition-colors"
+          >
             제출하기
           </button>
         </div>
