@@ -57,7 +57,7 @@ export default function AnswerForm({ onScoreUpdate }: AnswerFormProps) {
           </div>
           <button
             onClick={handleSubmit}
-            className="bg-slate-700 hover:bg-slate-800 text-white px-6 py-2.5 rounded-xl font-medium text-sm transition-colors"
+            className="bg-slate-800 hover:bg-slate-900 text-white px-6 py-2.5 rounded-xl font-medium text-sm transition-colors"
           >
             제출하기
           </button>

@@ -88,15 +88,15 @@ export default function ScoreResult({ score, onRetry }: ScoreResultProps) {
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm text-slate-600">내 점수</span>
-                <span className="text-sm font-bold text-blue-600">
+                <span className="text-sm font-bold text-slate-600">
                   {score}점
                 </span>
               </div>
             </div>
-            <div className="bg-blue-50 rounded-lg p-2 border border-blue-200">
+            <div className="bg-slate-50 rounded-lg p-2 border border-slate-200">
               <div className="flex items-center space-x-2">
                 <svg
-                  className="w-4 h-3 text-blue-600"
+                  className="w-4 h-3 text-slate-600"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -106,7 +106,7 @@ export default function ScoreResult({ score, onRetry }: ScoreResultProps) {
                     clipRule="evenodd"
                   />
                 </svg>
-                <p className="text-sm font-medium text-blue-800">
+                <p className="text-sm font-medium text-slate-700">
                   평균보다 {score - 72}점 높습니다!
                 </p>
               </div>
@@ -116,7 +116,7 @@ export default function ScoreResult({ score, onRetry }: ScoreResultProps) {
             <div className="mt-2 pointer-events-auto">
               <button
                 onClick={onRetry}
-                className="w-full bg-slate-700 hover:bg-slate-800 text-white py-2.5 px-4 rounded-xl font-medium text-sm transition-colors flex items-center justify-center space-x-2"
+                className="w-full bg-slate-800 hover:bg-slate-900 text-white py-2.5 px-4 rounded-xl font-medium text-sm transition-colors flex items-center justify-center space-x-2"
               >
                 <svg
                   className="w-4 h-3"
