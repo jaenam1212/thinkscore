@@ -4,10 +4,14 @@ import { useState } from "react";
 import AnimatedContent from "./ui/AnimatedContent";
 
 interface AnswerFormProps {
+  questionId?: string;
   onScoreUpdate?: (score: number) => void;
 }
 
-export default function AnswerForm({ onScoreUpdate }: AnswerFormProps) {
+export default function AnswerForm({
+  questionId,
+  onScoreUpdate,
+}: AnswerFormProps) {
   const [answer, setAnswer] = useState("");
   const [score, setScore] = useState<number | null>(null);
   const [showScore, setShowScore] = useState(false);

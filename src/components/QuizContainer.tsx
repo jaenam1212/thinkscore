@@ -1,18 +1,68 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AnswerForm from "./AnswerForm";
 import TextType from "./ui/TextType";
 import ScoreResult from "./ScoreResult";
+import { questionService } from "@/lib/services";
+import { Question } from "@/lib/database.types";
 
 export default function QuizContainer() {
   const [score, setScore] = useState<number | null>(null);
   const [showScore, setShowScore] = useState(false);
+  const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // 백엔드에서 오늘의 문제 로드
+    const loadTodaysQuestion = async () => {
+      try {
+        console.log("Loading today's question...");
+        const question = await questionService.getTodaysQuestion();
+        console.log("Today's question loaded:", question);
+        setCurrentQuestion(question);
+      } catch (error) {
+        console.error("Failed to load today's question:", error);
+        console.error("Error details:", {
+          message: (error as Error).message,
+          stack: (error as Error).stack,
+          name: (error as Error).name,
+        });
+        // 실패시 첫 번째 활성 문제 로드
+        try {
+          console.log("Trying to load fallback questions...");
+          const questions = await questionService.getActiveQuestions();
+          console.log("Fallback questions loaded:", questions);
+          if (questions.length > 0) {
+            setCurrentQuestion(questions[0]);
+          }
+        } catch (fallbackError) {
+          console.error("Failed to load fallback question:", fallbackError);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadTodaysQuestion();
+  }, []);
 
   const handleRetry = () => {
     setScore(null);
     setShowScore(false);
   };
+
+  const formatDate = (date: Date) => {
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    return `${month}월 ${day}일`;
+  };
+
+  if (loading || !currentQuestion) {
+    return (
+      <div className="flex-1 flex items-center justify-center">로딩 중...</div>
+    );
+  }
 
   return (
     <>
@@ -28,7 +78,7 @@ export default function QuizContainer() {
           <div className="bg-gray-50 rounded-2xl p-5 mb-6">
             <div className="text-center">
               <TextType
-                text={["8월 18일  트롤리 딜레마"]}
+                text={[`${formatDate(new Date())}  ${currentQuestion.title}`]}
                 typingSpeed={75}
                 pauseDuration={1500}
                 showCursor={true}
@@ -38,19 +88,14 @@ export default function QuizContainer() {
               />
             </div>
             {!showScore && (
-              <p className="text-gray-700 leading-relaxed text-sm">
-                당신은 철도 분기점 근처에 서 있습니다. 폭주하는 트롤리가
-                직진하면 선로에 묶여 있는 5명의 사람을 치어 죽일 것입니다.
-                <br />
-                <br />
-                당신 앞에는 레버가 있어서, 이를 당기면 트롤리를 옆 선로로 돌릴
-                수 있습니다. 하지만 옆 선로에는 1명이 묶여 있어 그 사람이 죽게
-                됩니다.
-                <br />
-                <br />
-                당신은 레버를 당겨 5명을 구하고 1명을 희생시키겠습니까, 아니면
-                아무것도 하지 않겠습니까?
-              </p>
+              <div className="mt-4">
+                <div className="text-xs text-gray-500 mb-2 text-center">
+                  {currentQuestion.description}
+                </div>
+                <p className="text-gray-700 leading-relaxed text-sm whitespace-pre-line">
+                  {currentQuestion.content}
+                </p>
+              </div>
             )}
           </div>
         </div>
@@ -59,6 +104,7 @@ export default function QuizContainer() {
       {/* 답변 입력 영역 - 하단 고정 */}
       {!showScore && (
         <AnswerForm
+          questionId={currentQuestion.id.toString()}
           onScoreUpdate={(newScore) => {
             setScore(newScore);
             setShowScore(true);

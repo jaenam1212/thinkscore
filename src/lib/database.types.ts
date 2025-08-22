@@ -6,9 +6,16 @@ export interface Profile {
 
 export interface Question {
   id: number;
-  prompt: string;
+  title: string;
+  description: string;
+  content: string;
+  category: string;
+  difficulty: "easy" | "medium" | "hard";
+  tags: string[];
+  evaluation_criteria: string[];
   is_active: boolean;
   created_at: string;
+  updated_at?: string;
 }
 
 export interface Answer {

@@ -55,6 +55,15 @@ export const questionService = {
 
   updateQuestion: (id: number, data: UpdateQuestionData): Promise<Question> =>
     apiClient.put<Question, UpdateQuestionData>(`/questions/${id}`, data),
+
+  seedQuestions: (): Promise<{ message: string }> =>
+    apiClient.post<{ message: string }>("/questions/seed", {}),
+
+  getTodaysQuestion: (): Promise<Question> =>
+    apiClient.get<Question>("/questions/today"),
+
+  getRandomQuestion: (): Promise<Question> =>
+    apiClient.get<Question>("/questions/random"),
 };
 
 export const answerService = {

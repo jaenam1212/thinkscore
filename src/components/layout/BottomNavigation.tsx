@@ -28,6 +28,15 @@ export default function BottomNavigation() {
           <span className="text-xs">랭킹</span>
         </Link>
         <Link
+          href="/"
+          className={`flex flex-col items-center py-2 px-2 ${pathname === "/" ? "text-slate-700" : "text-gray-400"}`}
+        >
+          <svg className="w-4 h-4 mb-1" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+          </svg>
+          <span className="text-xs">홈</span>
+        </Link>
+        <Link
           href="/discussion"
           className={`flex flex-col items-center py-2 px-2 ${pathname === "/discussion" ? "text-slate-700" : "text-gray-400"}`}
         >
@@ -45,15 +54,6 @@ export default function BottomNavigation() {
             />
           </svg>
           <span className="text-xs">포럼</span>
-        </Link>
-        <Link
-          href="/"
-          className={`flex flex-col items-center py-2 px-2 ${pathname === "/" ? "text-slate-700" : "text-gray-400"}`}
-        >
-          <svg className="w-4 h-4 mb-1" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
-          </svg>
-          <span className="text-xs">홈</span>
         </Link>
         <Link
           href="/profile"
