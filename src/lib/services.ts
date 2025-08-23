@@ -78,6 +78,15 @@ export const answerService = {
 
   createAnswer: (data: CreateAnswerData): Promise<Answer> =>
     apiClient.post<Answer, CreateAnswerData>("/answers", data),
+
+  evaluateAnswer: (
+    answerId: number
+  ): Promise<{
+    score: number;
+    feedback: string;
+    criteriaScores: Record<string, number>;
+    scoreRecord?: Score;
+  }> => apiClient.post(`/answers/${answerId}/evaluate`, {}),
 };
 
 export const scoreService = {
