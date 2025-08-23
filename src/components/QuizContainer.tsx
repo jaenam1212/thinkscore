@@ -12,6 +12,11 @@ export default function QuizContainer() {
   const [showScore, setShowScore] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
   const [loading, setLoading] = useState(true);
+  const [evaluation, setEvaluation] = useState<{
+    score: number;
+    feedback: string;
+    criteriaScores: Record<string, number>;
+  } | null>(null);
 
   useEffect(() => {
     // 백엔드에서 오늘의 문제 로드
@@ -50,6 +55,7 @@ export default function QuizContainer() {
   const handleRetry = () => {
     setScore(null);
     setShowScore(false);
+    setEvaluation(null);
   };
 
   const formatDate = (date: Date) => {
@@ -67,8 +73,13 @@ export default function QuizContainer() {
   return (
     <>
       {/* 점수 결과 표시 */}
-      {showScore && score && (
-        <ScoreResult score={score} onRetry={handleRetry} />
+      {showScore && score !== null && (
+        <ScoreResult
+          score={score}
+          feedback={evaluation?.feedback}
+          criteriaScores={evaluation?.criteriaScores}
+          onRetry={handleRetry}
+        />
       )}
 
       {/* 메인 컨텐츠 */}
@@ -104,10 +115,13 @@ export default function QuizContainer() {
       {/* 답변 입력 영역 - 하단 고정 */}
       {!showScore && (
         <AnswerForm
-          questionId={currentQuestion.id.toString()}
+          questionId={currentQuestion.id}
           onScoreUpdate={(newScore) => {
             setScore(newScore);
             setShowScore(true);
+          }}
+          onEvaluationComplete={(evaluationResult) => {
+            setEvaluation(evaluationResult);
           }}
         />
       )}

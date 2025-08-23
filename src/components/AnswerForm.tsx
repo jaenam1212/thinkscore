@@ -2,19 +2,33 @@
 
 import { useState } from "react";
 import AnimatedContent from "./ui/AnimatedContent";
+import { answerService, profileService } from "@/lib/services";
+import EvaluationResult from "./EvaluationResult";
 
 interface AnswerFormProps {
-  questionId?: string;
+  questionId: number;
   onScoreUpdate?: (score: number) => void;
+  onEvaluationComplete?: (evaluation: {
+    score: number;
+    feedback: string;
+    criteriaScores: Record<string, number>;
+  }) => void;
 }
 
 export default function AnswerForm({
   questionId,
   onScoreUpdate,
+  onEvaluationComplete,
 }: AnswerFormProps) {
   const [answer, setAnswer] = useState("");
-  const [score, setScore] = useState<number | null>(null);
-  const [showScore, setShowScore] = useState(false);
+  const [evaluation, setEvaluation] = useState<{
+    score: number;
+    feedback: string;
+    criteriaScores: Record<string, number>;
+  } | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isEvaluating, setIsEvaluating] = useState(false);
+  const [showResult, setShowResult] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     if (e.target.value.length <= 1000) {
@@ -27,22 +41,126 @@ export default function AnswerForm({
     }
   };
 
-  const handleSubmit = () => {
-    if (answer.trim()) {
-      // 랜덤 점수 생성 (50-100점)
-      const randomScore = Math.floor(Math.random() * 51) + 50;
-      setScore(randomScore);
-      setShowScore(true);
+  const handleSubmit = async () => {
+    if (!answer.trim() || isSubmitting) return;
 
-      // 부모 컴포넌트에 점수 전달
-      if (onScoreUpdate) {
-        onScoreUpdate(randomScore);
+    try {
+      setIsSubmitting(true);
+
+      // UUID 형식의 임시 user_id 생성 (추후 실제 인증 시스템 연동)
+      const userId = crypto.randomUUID();
+
+      // 0. 먼저 프로필 생성 (외래키 제약조건 해결)
+      try {
+        await profileService.createProfile({
+          id: userId,
+          display_name: "익명 사용자",
+        });
+      } catch (profileError) {
+        // 프로필이 이미 존재할 수 있으므로 에러 무시
+        console.log("프로필 생성 건너뜀:", profileError);
       }
+
+      // 1. 답변 제출
+      const answerResult = await answerService.createAnswer({
+        user_id: userId,
+        question_id: questionId,
+        content: answer.trim(),
+      });
+
+      setIsEvaluating(true);
+
+      // 2. AI 평가 요청
+      const evaluationResult = await answerService.evaluateAnswer(
+        answerResult.id
+      );
+
+      console.log("=== Frontend Evaluation Result ===");
+      console.log("evaluationResult:", evaluationResult);
+
+      setEvaluation(evaluationResult);
+      setShowResult(true);
+
+      // 부모 컴포넌트에 점수와 평가 결과 전달
+      if (onScoreUpdate) {
+        onScoreUpdate(evaluationResult.score);
+      }
+      if (onEvaluationComplete) {
+        onEvaluationComplete(evaluationResult);
+      }
+    } catch (error) {
+      console.error("답변 제출 중 오류:", error);
+      alert("답변 제출 중 오류가 발생했습니다. 다시 시도해주세요.");
+    } finally {
+      setIsSubmitting(false);
+      setIsEvaluating(false);
     }
   };
 
+  // 평가 완료 후 기존 ScoreResult로 전환 (모달 비활성화)
+
   return (
     <div className="fixed bottom-16 left-0 right-0 max-w-md mx-auto p-4 bg-stone-50 border-t border-gray-200 z-10">
+      {/* 평가 중일 때 전체 화면 로딩 모달 */}
+      {isEvaluating && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg max-w-lg w-full">
+            <div className="p-6">
+              <div className="text-center mb-6">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                </div>
+                <h3 className="text-xl font-bold text-gray-800 mb-2">
+                  AI 평가 중...
+                </h3>
+                <p className="text-gray-600">
+                  GPT-5가 당신의 답변을 분석하고 있습니다
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <div className="bg-gray-100 rounded-lg p-3 animate-pulse">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce"></div>
+                    <span className="text-gray-600 text-sm">
+                      논리적 구조 분석
+                    </span>
+                  </div>
+                </div>
+                <div
+                  className="bg-gray-100 rounded-lg p-3 animate-pulse"
+                  style={{ animationDelay: "0.2s" }}
+                >
+                  <div className="flex items-center space-x-3">
+                    <div
+                      className="w-2 h-2 bg-green-600 rounded-full animate-bounce"
+                      style={{ animationDelay: "0.2s" }}
+                    ></div>
+                    <span className="text-gray-600 text-sm">창의성 평가</span>
+                  </div>
+                </div>
+                <div
+                  className="bg-gray-100 rounded-lg p-3 animate-pulse"
+                  style={{ animationDelay: "0.4s" }}
+                >
+                  <div className="flex items-center space-x-3">
+                    <div
+                      className="w-2 h-2 bg-purple-600 rounded-full animate-bounce"
+                      style={{ animationDelay: "0.4s" }}
+                    ></div>
+                    <span className="text-gray-600 text-sm">일관성 검토</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 text-center">
+                <p className="text-sm text-gray-500">평균 소요시간: 3-5초</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="bg-white border border-gray-200 rounded-2xl">
         <textarea
           value={answer}
@@ -50,9 +168,10 @@ export default function AnswerForm({
           placeholder="당신의 생각과 근거를 자유롭게 작성해보세요..."
           className="w-full min-h-[48px] p-4 border-0 rounded-2xl resize-none focus:outline-none text-sm overflow-y-auto"
           rows={1}
+          disabled={isSubmitting}
           style={{
-            height: "48px", // 초기 한 줄 높이
-            maxHeight: "256px", // 최대 높이 (기존 h-64와 같음)
+            height: "48px",
+            maxHeight: "256px",
           }}
         />
         <div className="flex items-center justify-between p-4 pt-0">
@@ -61,9 +180,10 @@ export default function AnswerForm({
           </div>
           <button
             onClick={handleSubmit}
-            className="bg-slate-800 hover:bg-slate-900 text-white px-6 py-2.5 rounded-xl font-medium text-sm transition-colors"
+            disabled={!answer.trim() || isSubmitting}
+            className="bg-slate-800 hover:bg-slate-900 disabled:bg-gray-300 text-white px-6 py-2.5 rounded-xl font-medium text-sm transition-colors"
           >
-            제출하기
+            {isSubmitting ? "제출 중..." : "제출하기"}
           </button>
         </div>
       </div>

@@ -4,10 +4,62 @@ import CountUp from "./ui/CountUp";
 
 interface ScoreResultProps {
   score: number;
+  feedback?: string;
+  criteriaScores?: Record<string, number>;
   onRetry?: () => void;
 }
 
-export default function ScoreResult({ score, onRetry }: ScoreResultProps) {
+export default function ScoreResult({
+  score,
+  feedback,
+  criteriaScores,
+  onRetry,
+}: ScoreResultProps) {
+  // 피드백을 강점과 개선점으로 분리
+  const parseStrength = (text: string) => {
+    const match = text.match(/강점:\s*([^.]*\.?[^개선]*)/);
+    return match ? match[1].trim() : "";
+  };
+
+  const parseImprovement = (text: string) => {
+    const match = text.match(/개선점:\s*(.+)/);
+    return match ? match[1].trim() : "";
+  };
+
+  const strength = feedback
+    ? parseStrength(feedback)
+    : "분석이 제공되었습니다.";
+  const improvement = feedback
+    ? parseImprovement(feedback)
+    : "추가 개선 사항을 검토해보세요.";
+
+  // 영문 키를 한글로 매핑
+  const criteriaMapping: Record<string, string> = {
+    conceptual_analysis: "논리적 사고",
+    logical_reasoning: "창의적 사고",
+    interpretive_depth: "일관성",
+  };
+
+  // 기본값 설정 (AI 데이터가 없을 때만)
+  const defaultCriteriaScores = {
+    "논리적 사고": 85,
+    "창의적 사고": 92,
+    일관성: 78,
+  };
+
+  // AI 데이터를 한글로 변환
+  const mappedCriteria: Record<string, number> = {};
+  if (criteriaScores && Object.keys(criteriaScores).length > 0) {
+    Object.entries(criteriaScores).forEach(([key, value]) => {
+      const koreanKey = criteriaMapping[key] || key;
+      mappedCriteria[koreanKey] = value;
+    });
+  }
+
+  const displayCriteria =
+    Object.keys(mappedCriteria).length > 0
+      ? mappedCriteria
+      : defaultCriteriaScores;
   return (
     <div className="fixed inset-0 flex items-start pt-45 center justify-center z-50 pointer-events-none">
       <style jsx>{`
@@ -50,26 +102,58 @@ export default function ScoreResult({ score, onRetry }: ScoreResultProps) {
         <div className="bg-white rounded-2xl p-6 shadow-lg border border-slate-200 max-w-sm">
           <h3 className="text-lg font-bold text-slate-800 mb-3">점수 평가</h3>
           <div className="space-y-3 mb-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-slate-600">논리적 사고</span>
-              <span className="text-sm font-medium text-slate-800">85점</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-slate-600">창의적 사고</span>
-              <span className="text-sm font-medium text-slate-800">92점</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-slate-600">일관성</span>
-              <span className="text-sm font-medium text-slate-800">78점</span>
-            </div>
+            {Object.entries(displayCriteria).map(
+              ([criteriaName, criteriaScore]) => (
+                <div
+                  key={criteriaName}
+                  className="flex items-center justify-between"
+                >
+                  <span className="text-sm text-slate-600">{criteriaName}</span>
+                  <span className="text-sm font-medium text-slate-800">
+                    {criteriaScore}점
+                  </span>
+                </div>
+              )
+            )}
           </div>
 
           {/* 점수를 받은 이유 */}
           <div className="mb-4 p-3 bg-slate-50 rounded-lg">
-            <p className="text-sm text-slate-700 leading-relaxed">
-              당신의 답변은 도덕적 딜레마에 대한 깊은 사고를 보여주었습니다.
-              특히 결과보다는 과정을 중시하는 윤리적 판단력이 뛰어납니다.
-            </p>
+            <div className="space-y-2">
+              {feedback ? (
+                <>
+                  {strength && (
+                    <div className="text-sm text-slate-700">
+                      <span className="font-medium text-green-700">
+                        👍 강점:
+                      </span>{" "}
+                      {strength}
+                    </div>
+                  )}
+                  {improvement && (
+                    <div className="text-sm text-slate-700">
+                      <span className="font-medium text-blue-700">
+                        💡 개선점:
+                      </span>{" "}
+                      {improvement}
+                    </div>
+                  )}
+                  {(!strength || !improvement) && (
+                    <div className="text-sm text-slate-700">
+                      <span className="font-medium text-blue-700">
+                        💬 피드백:
+                      </span>{" "}
+                      {feedback}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <p className="text-sm text-slate-700 leading-relaxed">
+                  당신의 답변은 도덕적 딜레마에 대한 깊은 사고를 보여주었습니다.
+                  특히 결과보다는 과정을 중시하는 윤리적 판단력이 뛰어납니다.
+                </p>
+              )}
+            </div>
           </div>
 
           {/* 다른 사용자들과의 비교 */}
