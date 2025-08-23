@@ -1,24 +1,189 @@
+"use client";
+
 import LeftSidebar from "@/components/layout/LeftSidebar";
 import RightSidebar from "@/components/layout/RightSidebar";
 import BottomNavigation from "@/components/layout/BottomNavigation";
+import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { answerService, scoreService, questionService } from "@/lib/services";
+import { Answer, Score, Question } from "@/lib/database.types";
+import ScoreResult from "@/components/ScoreResult";
+
+interface AnswerWithScore extends Answer {
+  question_title?: string;
+  score?: number;
+  scoreDate?: string;
+  feedback?: string;
+  criteriaScores?: Record<string, number>;
+}
 
 export default function ProfilePage() {
-  // 가짜 프로필 데이터
-  const profileData = {
-    name: "김사용자",
-    email: "user@example.com",
-    joinDate: "2024.08.15",
-    totalTests: 24,
-    averageScore: 82,
-    bestScore: 98,
-    rank: 7,
+  const { user, isAuthenticated, logout } = useAuth();
+  const router = useRouter();
+  const [recentAnswers, setRecentAnswers] = useState<AnswerWithScore[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedAnswer, setSelectedAnswer] = useState<AnswerWithScore | null>(
+    null
+  );
+  const [showScoreModal, setShowScoreModal] = useState(false);
 
-    recentTests: [
-      { date: "2024.08.18", title: "트롤리 딜레마", score: 85 },
-      { date: "2024.08.17", title: "죄수의 딜레마", score: 92 },
-      { date: "2024.08.16", title: "마시멜로 실험", score: 78 },
-      { date: "2024.08.15", title: "도덕적 기계", score: 88 },
-    ],
+  // 로그인하지 않은 경우 홈으로 리다이렉트
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push("/");
+    }
+  }, [isAuthenticated, router]);
+
+  // 사용자 답변 및 점수 불러오기
+  useEffect(() => {
+    const loadUserData = async () => {
+      if (!user?.id || !isAuthenticated) return;
+
+      try {
+        setLoading(true);
+
+        // 사용자 답변 가져오기
+        const answers = await answerService.getUserAnswers(user.id);
+
+        // 각 답변의 점수 정보와 문제 정보 가져오기
+        const answersWithScores = await Promise.all(
+          answers.map(async (answer) => {
+            try {
+              const [scores, question] = await Promise.all([
+                scoreService.getAnswerScores(answer.id),
+                questionService.getQuestion(answer.question_id),
+              ]);
+
+              const latestScore =
+                scores.length > 0 ? scores[scores.length - 1] : null;
+
+              return {
+                ...answer,
+                question_title: question.title,
+                score: latestScore?.score,
+                scoreDate: latestScore?.created_at,
+                feedback: latestScore?.reason,
+                // 기본 criteriaScores (실제 구현시 latestScore에서 가져와야 함)
+                criteriaScores:
+                  latestScore?.score !== undefined
+                    ? latestScore.score === 0
+                      ? {
+                          "논리적 사고": 0,
+                          "창의적 사고": 0,
+                          일관성: 0,
+                        }
+                      : {
+                          "논리적 사고": Math.round(
+                            Math.min(
+                              100,
+                              Math.max(
+                                1,
+                                latestScore.score + Math.random() * 10 - 5
+                              )
+                            )
+                          ),
+                          "창의적 사고": Math.round(
+                            Math.min(
+                              100,
+                              Math.max(
+                                1,
+                                latestScore.score + Math.random() * 10 - 5
+                              )
+                            )
+                          ),
+                          일관성: Math.round(
+                            Math.min(
+                              100,
+                              Math.max(
+                                1,
+                                latestScore.score + Math.random() * 10 - 5
+                              )
+                            )
+                          ),
+                        }
+                    : undefined,
+              };
+            } catch (error) {
+              console.error(
+                `Error loading data for answer ${answer.id}:`,
+                error
+              );
+              return answer;
+            }
+          })
+        );
+
+        // 최신 순으로 정렬하고 최대 5개만
+        const sortedAnswers = answersWithScores
+          .sort(
+            (a, b) =>
+              new Date(b.created_at).getTime() -
+              new Date(a.created_at).getTime()
+          )
+          .slice(0, 5);
+
+        setRecentAnswers(sortedAnswers);
+      } catch (error) {
+        console.error("사용자 데이터 로딩 중 오류:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadUserData();
+  }, [user, isAuthenticated]);
+
+  if (!isAuthenticated) {
+    return null;
+  }
+
+  const handleLogout = () => {
+    console.log("로그아웃 버튼 클릭됨");
+    logout();
+    router.push("/");
+  };
+
+  // 프로필 데이터
+  const profileData = {
+    name: user?.displayName || "사용자",
+    email: user?.email || "user@example.com",
+    totalTests: recentAnswers.length,
+    averageScore:
+      recentAnswers.length > 0
+        ? Math.round(
+            recentAnswers
+              .filter((a) => a.score !== undefined)
+              .reduce((sum, a) => sum + (a.score || 0), 0) /
+              recentAnswers.filter((a) => a.score !== undefined).length
+          )
+        : 0,
+    bestScore:
+      recentAnswers.length > 0
+        ? Math.max(
+            ...recentAnswers
+              .filter((a) => a.score !== undefined)
+              .map((a) => a.score || 0)
+          )
+        : 0,
+    rank: 7, // 임시 값
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return `${date.getMonth() + 1}월 ${date.getDate()}일`;
+  };
+
+  const handleAnswerClick = (answer: AnswerWithScore) => {
+    if (answer.score !== undefined) {
+      setSelectedAnswer(answer);
+      setShowScoreModal(true);
+    }
+  };
+
+  const handleCloseScoreModal = () => {
+    setShowScoreModal(false);
+    setSelectedAnswer(null);
   };
 
   return (
@@ -53,9 +218,6 @@ export default function ProfilePage() {
                 {profileData.name}
               </h2>
               <p className="text-sm text-gray-600 mb-2">{profileData.email}</p>
-              <p className="text-xs text-gray-500 mb-2">
-                가입일: {profileData.joinDate}
-              </p>
             </div>
           </div>
 
@@ -88,40 +250,72 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            {/* 최근 테스트 기록 */}
+            {/* 최근 답변 기록 */}
             <div className="mb-6">
               <h3 className="text-lg font-bold text-gray-800 mb-3">
-                최근 테스트 기록
+                최근 답변 기록
               </h3>
-              <div className="space-y-3">
-                {profileData.recentTests.map((test, index) => (
-                  <div
-                    key={index}
-                    className="bg-white rounded-xl p-4 border border-gray-200"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="font-medium text-gray-800">
-                          {test.title}
+              {loading ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-600 mx-auto"></div>
+                  <p className="text-gray-500 mt-2">로딩 중...</p>
+                </div>
+              ) : recentAnswers.length > 0 ? (
+                <div className="space-y-3">
+                  {recentAnswers.map((answer) => (
+                    <div
+                      key={answer.id}
+                      onClick={() => handleAnswerClick(answer)}
+                      className={`bg-white rounded-xl p-4 border border-gray-200 transition-colors ${
+                        answer.score !== undefined
+                          ? "hover:bg-gray-50 cursor-pointer"
+                          : ""
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="font-medium text-gray-800 mb-2">
+                            {formatDate(answer.created_at)}{" "}
+                            {answer.question_title || `답변 #${answer.id}`}
+                          </div>
+                          <div className="text-sm text-gray-600 mb-2 line-clamp-2">
+                            {answer.content.substring(0, 100)}
+                            {answer.content.length > 100 ? "..." : ""}
+                          </div>
+                          {answer.score !== undefined && (
+                            <div className="text-xs text-blue-600">
+                              📊 평가 결과 보기
+                            </div>
+                          )}
                         </div>
-                        <div className="text-sm text-gray-500">{test.date}</div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-lg font-bold text-slate-600">
-                          {test.score}점
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          {test.score >= 90
-                            ? "🏆 우수"
-                            : test.score >= 80
-                              ? "👍 양호"
-                              : "📚 보통"}
-                        </div>
+                        {answer.score !== undefined && (
+                          <div className="text-right ml-4">
+                            <div className="text-lg font-bold text-slate-600">
+                              {answer.score}점
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {answer.score >= 90
+                                ? "🏆 우수"
+                                : answer.score >= 80
+                                  ? "👍 양호"
+                                  : answer.score >= 60
+                                    ? "📚 보통"
+                                    : "💪 노력"}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="bg-white rounded-xl p-6 border border-gray-200 text-center">
+                  <p className="text-gray-500">아직 작성한 답변이 없습니다.</p>
+                  <p className="text-sm text-gray-400 mt-1">
+                    첫 번째 답변을 작성해보세요!
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* 설정 옵션 */}
@@ -182,7 +376,10 @@ export default function ProfilePage() {
                     </svg>
                   </div>
                 </button>
-                <button className="w-full text-left p-4 hover:bg-gray-50 transition-colors text-red-600">
+                <button
+                  onClick={handleLogout}
+                  className="w-full text-left p-4 hover:bg-gray-50 transition-colors text-red-600"
+                >
                   <span>로그아웃</span>
                 </button>
               </div>
@@ -194,6 +391,21 @@ export default function ProfilePage() {
       </div>
 
       <RightSidebar />
+
+      {/* 점수 결과 모달 */}
+      {showScoreModal &&
+        selectedAnswer &&
+        selectedAnswer.score !== undefined && (
+          <ScoreResult
+            score={selectedAnswer.score}
+            feedback={
+              selectedAnswer.feedback || "피드백이 제공되지 않았습니다."
+            }
+            criteriaScores={selectedAnswer.criteriaScores}
+            onRetry={handleCloseScoreModal}
+            onClose={handleCloseScoreModal}
+          />
+        )}
     </div>
   );
 }

@@ -1,5 +1,12 @@
 import { apiClient } from "./api";
-import { Profile, Question, Answer, Score } from "./database.types";
+import {
+  Profile,
+  Question,
+  Answer,
+  Score,
+  ForumPost,
+  ForumComment,
+} from "./database.types";
 
 interface CreateProfileData {
   id: string;
@@ -101,4 +108,67 @@ export const scoreService = {
 
   createScore: (data: CreateScoreData): Promise<Score> =>
     apiClient.post<Score, CreateScoreData>("/scores", data),
+};
+
+// Forum interfaces
+interface CreateForumPostData {
+  title: string;
+  content: string;
+  category?: string;
+}
+
+interface UpdateForumPostData {
+  title?: string;
+  content?: string;
+  category?: string;
+}
+
+interface CreateCommentData {
+  content: string;
+}
+
+export const forumService = {
+  // Posts
+  getAllPosts: (): Promise<ForumPost[]> =>
+    apiClient.get<ForumPost[]>("/forum/posts"),
+
+  getPost: (id: number): Promise<ForumPost> =>
+    apiClient.get<ForumPost>(`/forum/posts/${id}`),
+
+  createPost: (data: CreateForumPostData): Promise<ForumPost> =>
+    apiClient.post<ForumPost, CreateForumPostData>("/forum/posts", data),
+
+  updatePost: (id: number, data: UpdateForumPostData): Promise<ForumPost> =>
+    apiClient.put<ForumPost, UpdateForumPostData>(`/forum/posts/${id}`, data),
+
+  deletePost: (id: number): Promise<void> =>
+    apiClient.delete(`/forum/posts/${id}`),
+
+  likePost: (id: number): Promise<void> =>
+    apiClient.post(`/forum/posts/${id}/like`, {}),
+
+  unlikePost: (id: number): Promise<void> =>
+    apiClient.delete(`/forum/posts/${id}/like`),
+
+  // Comments
+  getPostComments: (postId: number): Promise<ForumComment[]> =>
+    apiClient.get<ForumComment[]>(`/forum/posts/${postId}/comments`),
+
+  createComment: (
+    postId: number,
+    data: CreateCommentData
+  ): Promise<ForumComment> =>
+    apiClient.post<ForumComment, CreateCommentData>(
+      `/forum/posts/${postId}/comments`,
+      data
+    ),
+
+  updateComment: (id: number, data: CreateCommentData): Promise<ForumComment> =>
+    apiClient.put<ForumComment, CreateCommentData>(
+      `/forum/comments/${id}`,
+      data
+    ),
+
+  deleteComment: (id: number): Promise<void> =>
+    apiClient.delete(`/forum/comments/${id}`),
 };

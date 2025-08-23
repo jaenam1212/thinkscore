@@ -7,6 +7,7 @@ interface ScoreResultProps {
   feedback?: string;
   criteriaScores?: Record<string, number>;
   onRetry?: () => void;
+  onClose?: () => void;
 }
 
 export default function ScoreResult({
@@ -14,6 +15,7 @@ export default function ScoreResult({
   feedback,
   criteriaScores,
   onRetry,
+  onClose,
 }: ScoreResultProps) {
   // 피드백을 강점과 개선점으로 분리
   const parseStrength = (text: string) => {
@@ -60,8 +62,18 @@ export default function ScoreResult({
     Object.keys(mappedCriteria).length > 0
       ? mappedCriteria
       : defaultCriteriaScores;
+
+  const handleBackgroundClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget && onClose) {
+      onClose();
+    }
+  };
+
   return (
-    <div className="fixed inset-0 flex items-start pt-45 center justify-center z-50 pointer-events-none">
+    <div
+      className="fixed inset-0 flex items-start pt-45 center justify-center z-50 pointer-events-none"
+      onClick={handleBackgroundClick}
+    >
       <style jsx>{`
         @keyframes slideUpBounce {
           0% {
@@ -196,14 +208,14 @@ export default function ScoreResult({
               </div>
             </div>
 
-            {/* 다시하기 버튼 */}
+            {/* 닫기 버튼 */}
             <div className="mt-2 pointer-events-auto">
               <button
-                onClick={onRetry}
+                onClick={onClose || onRetry}
                 className="w-full bg-slate-800 hover:bg-slate-900 text-white py-2.5 px-4 rounded-xl font-medium text-sm transition-colors flex items-center justify-center space-x-2"
               >
                 <svg
-                  className="w-4 h-3"
+                  className="w-4 h-4"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -212,10 +224,10 @@ export default function ScoreResult({
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                    d="M6 18L18 6M6 6l12 12"
                   />
                 </svg>
-                <span>다시하기</span>
+                <span>닫기</span>
               </button>
             </div>
           </div>

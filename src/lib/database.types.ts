@@ -37,3 +37,36 @@ export interface Score {
   created_at: string;
   answers?: Answer;
 }
+
+export interface ForumPost {
+  id: number;
+  title: string;
+  content: string;
+  author_id: string;
+  category: string;
+  views_count: number;
+  likes_count: number;
+  is_pinned: boolean;
+  created_at: string;
+  updated_at: string;
+  profiles?: Profile;
+  comments?: ForumComment[];
+  comments_count?: number;
+}
+
+export interface ForumComment {
+  id: number;
+  post_id: number;
+  content: string;
+  author_id: string;
+  created_at: string;
+  updated_at: string;
+  profiles?: Profile;
+}
+
+export interface ForumLike {
+  id: number;
+  post_id: number;
+  user_id: string;
+  created_at: string;
+}

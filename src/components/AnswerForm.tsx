@@ -7,6 +7,7 @@ import EvaluationResult from "./EvaluationResult";
 
 interface AnswerFormProps {
   questionId: number;
+  userId: string;
   onScoreUpdate?: (score: number) => void;
   onEvaluationComplete?: (evaluation: {
     score: number;
@@ -17,6 +18,7 @@ interface AnswerFormProps {
 
 export default function AnswerForm({
   questionId,
+  userId,
   onScoreUpdate,
   onEvaluationComplete,
 }: AnswerFormProps) {
@@ -47,21 +49,7 @@ export default function AnswerForm({
     try {
       setIsSubmitting(true);
 
-      // UUID 형식의 임시 user_id 생성 (추후 실제 인증 시스템 연동)
-      const userId = crypto.randomUUID();
-
-      // 0. 먼저 프로필 생성 (외래키 제약조건 해결)
-      try {
-        await profileService.createProfile({
-          id: userId,
-          display_name: "익명 사용자",
-        });
-      } catch (profileError) {
-        // 프로필이 이미 존재할 수 있으므로 에러 무시
-        console.log("프로필 생성 건너뜀:", profileError);
-      }
-
-      // 1. 답변 제출
+      // 1. 답변 제출 (인증된 사용자 ID 사용)
       const answerResult = await answerService.createAnswer({
         user_id: userId,
         question_id: questionId,

@@ -4,14 +4,18 @@ import { useState, useEffect } from "react";
 import AnswerForm from "./AnswerForm";
 import TextType from "./ui/TextType";
 import ScoreResult from "./ScoreResult";
+import AuthModal from "./auth/AuthModal";
 import { questionService } from "@/lib/services";
 import { Question } from "@/lib/database.types";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function QuizContainer() {
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const [score, setScore] = useState<number | null>(null);
   const [showScore, setShowScore] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const [evaluation, setEvaluation] = useState<{
     score: number;
     feedback: string;
@@ -64,14 +68,30 @@ export default function QuizContainer() {
     return `${month}월 ${day}일`;
   };
 
-  if (loading || !currentQuestion) {
+  // 인증 로딩 중이거나 문제 로딩 중일 때
+  if (authLoading || loading || !currentQuestion) {
     return (
       <div className="flex-1 flex items-center justify-center">로딩 중...</div>
     );
   }
 
+  // 인증되지 않은 사용자에게 로그인 요구
+  const handleStartQuiz = () => {
+    if (!isAuthenticated) {
+      setShowAuthModal(true);
+      return;
+    }
+  };
+
   return (
     <>
+      {/* 인증 모달 */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        initialMode="login"
+      />
+
       {/* 점수 결과 표시 */}
       {showScore && score !== null && (
         <ScoreResult
@@ -114,16 +134,38 @@ export default function QuizContainer() {
 
       {/* 답변 입력 영역 - 하단 고정 */}
       {!showScore && (
-        <AnswerForm
-          questionId={currentQuestion.id}
-          onScoreUpdate={(newScore) => {
-            setScore(newScore);
-            setShowScore(true);
-          }}
-          onEvaluationComplete={(evaluationResult) => {
-            setEvaluation(evaluationResult);
-          }}
-        />
+        <>
+          {isAuthenticated ? (
+            <AnswerForm
+              questionId={currentQuestion.id}
+              userId={user?.id || ""}
+              onScoreUpdate={(newScore) => {
+                setScore(newScore);
+                setShowScore(true);
+              }}
+              onEvaluationComplete={(evaluationResult) => {
+                setEvaluation(evaluationResult);
+              }}
+            />
+          ) : (
+            <div className="fixed bottom-16 left-0 right-0 max-w-md mx-auto p-4 bg-stone-50 border-t border-gray-200 z-10">
+              <div className="bg-white border border-gray-200 rounded-2xl p-6 text-center">
+                <h3 className="text-lg font-bold text-gray-800 mb-2">
+                  로그인이 필요합니다
+                </h3>
+                <p className="text-gray-600 mb-4 text-sm">
+                  답변을 작성하고 AI 평가를 받으려면 로그인해주세요.
+                </p>
+                <button
+                  onClick={handleStartQuiz}
+                  className="bg-slate-800 hover:bg-slate-900 text-white px-6 py-2.5 rounded-xl font-medium text-sm transition-colors"
+                >
+                  로그인하기
+                </button>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </>
   );
