@@ -6,7 +6,7 @@ import LeftSidebar from "@/components/layout/LeftSidebar";
 import RightSidebar from "@/components/layout/RightSidebar";
 import BottomNavigation from "@/components/layout/BottomNavigation";
 
-export default function DiscussionPage() {
+export default function ForumPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"all" | "popular" | "recent">(
     "all"
@@ -158,7 +158,7 @@ export default function DiscussionPage() {
 
   // 게시글 클릭 핸들러
   const handlePostClick = (postId: number) => {
-    router.push(`/discussion/${postId}`);
+    router.push(`/forum/${postId}`);
   };
 
   return (

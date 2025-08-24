@@ -37,8 +37,8 @@ export default function BottomNavigation() {
           <span className="text-xs">홈</span>
         </Link>
         <Link
-          href="/discussion"
-          className={`flex flex-col items-center py-2 px-2 ${pathname === "/discussion" ? "text-slate-700" : "text-gray-400"}`}
+          href="/forum"
+          className={`flex flex-col items-center py-2 px-2 ${pathname === "/forum" ? "text-slate-700" : "text-gray-400"}`}
         >
           <svg
             className="w-4 h-4 mb-1"
