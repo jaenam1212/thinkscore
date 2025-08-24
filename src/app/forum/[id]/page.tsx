@@ -56,7 +56,7 @@ export default function ForumPostPage() {
       setIsLiked(result.liked);
       setPost({
         ...post,
-        likes: result.liked ? post.likes + 1 : post.likes - 1,
+        likes_count: result.liked ? post.likes_count + 1 : post.likes_count - 1,
       });
     } catch (error) {
       console.error("Failed to toggle like:", error);
@@ -80,7 +80,7 @@ export default function ForumPostPage() {
       // 댓글 수 업데이트
       setPost({
         ...post,
-        replies: post.replies + 1,
+        comments_count: post.comments_count + 1,
       });
     } catch (error) {
       console.error("Failed to create comment:", error);
@@ -108,6 +108,9 @@ export default function ForumPostPage() {
       </PageLayout>
     );
   }
+
+  // post가 null이 아님을 보장
+  if (!post) return null;
 
   return (
     <PageLayout className="p-4">

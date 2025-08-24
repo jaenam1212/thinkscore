@@ -15,6 +15,18 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { apiClient } from "@/lib/api";
 
+interface UserAnswer {
+  id: number;
+  user_id: string;
+  question_id: number;
+  content: string;
+  created_at: string;
+  scores?: Array<{
+    score: number;
+    reason: string;
+  }>;
+}
+
 export default function ForumPage() {
   const router = useRouter();
   const { user } = useAuth();
@@ -35,9 +47,7 @@ export default function ForumPage() {
 
   // 점수 공유 모달 상태
   const [showScoreModal, setShowScoreModal] = useState(false);
-  const [userAnswer, setUserAnswer] = useState<Record<string, unknown> | null>(
-    null
-  );
+  const [userAnswer, setUserAnswer] = useState<UserAnswer | null>(null);
   const [userScore, setUserScore] = useState<{
     total_score: number;
     feedback: string;
