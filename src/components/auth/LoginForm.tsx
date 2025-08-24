@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import KakaoLoginButton from "./KakaoLoginButton";
+import { KakaoProfile } from "@/lib/kakao";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface LoginFormProps {
   onLogin: (email: string, password: string) => Promise<void>;
@@ -17,12 +20,31 @@ export default function LoginForm({
 }: LoginFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { loginWithKakao } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim() || !password.trim()) return;
 
     await onLogin(email, password);
+  };
+
+  const handleKakaoSuccess = async (
+    profile: KakaoProfile,
+    accessToken: string
+  ) => {
+    try {
+      await loginWithKakao(accessToken, profile);
+      console.log("카카오 로그인 성공:", profile);
+    } catch (error) {
+      console.error("카카오 로그인 처리 실패:", error);
+      alert("로그인 처리 중 오류가 발생했습니다.");
+    }
+  };
+
+  const handleKakaoError = (error: Error) => {
+    console.error("카카오 로그인 실패:", error);
+    alert("카카오 로그인에 실패했습니다. 다시 시도해 주세요.");
   };
 
   return (
@@ -132,16 +154,12 @@ export default function LoginForm({
           <span>네이버로 로그인</span>
         </button>
 
-        <button
-          onClick={() => alert("Kakao 로그인 (준비 중)")}
+        <KakaoLoginButton
+          onSuccess={handleKakaoSuccess}
+          onError={handleKakaoError}
           disabled={isLoading}
-          className="w-full flex items-center justify-center space-x-3 bg-yellow-400 hover:bg-yellow-500 disabled:bg-gray-100 text-black py-2.5 px-4 rounded-lg font-medium transition-colors"
-        >
-          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 3c5.799 0 10.5 3.664 10.5 8.185 0 4.52-4.701 8.184-10.5 8.184a13.5 13.5 0 0 1-1.727-.11l-4.408 2.883c-.501.265-.678.236-.472-.413l.892-3.678c-2.88-1.46-4.785-3.99-4.785-6.866C1.5 6.665 6.201 3 12 3z" />
-          </svg>
-          <span>카카오로 로그인</span>
-        </button>
+          className="w-full py-2.5 px-4"
+        />
 
         <button
           onClick={() => alert("Apple 로그인 (준비 중)")}

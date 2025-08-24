@@ -1,0 +1,265 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import PageLayout from "@/components/layout/PageLayout";
+import { ForumAPI, ForumPost, ForumComment } from "@/lib/forum-api";
+
+export default function ForumPostPage() {
+  const params = useParams();
+  const router = useRouter();
+  const postId = parseInt(params.id as string);
+
+  const [post, setPost] = useState<ForumPost | null>(null);
+  const [comments, setComments] = useState<ForumComment[]>([]);
+  const [newComment, setNewComment] = useState("");
+  const [isLiked, setIsLiked] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // API에서 게시글 데이터 가져오기
+  useEffect(() => {
+    const fetchPostData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // 게시글과 댓글 데이터를 병렬로 가져오기
+        const [postData, commentsData] = await Promise.all([
+          ForumAPI.getPost(postId),
+          ForumAPI.getComments(postId),
+        ]);
+
+        setPost(postData);
+        setComments(commentsData);
+      } catch (err) {
+        console.error("Failed to fetch post data:", err);
+        setError("게시글을 불러오는데 실패했습니다.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (postId && !isNaN(postId)) {
+      fetchPostData();
+    } else {
+      setError("잘못된 게시글 ID입니다.");
+      setLoading(false);
+    }
+  }, [postId]);
+
+  const handleLike = async () => {
+    if (!post) return;
+
+    try {
+      const result = await ForumAPI.toggleLike(postId);
+      setIsLiked(result.liked);
+      setPost({
+        ...post,
+        likes: result.liked ? post.likes + 1 : post.likes - 1,
+      });
+    } catch (error) {
+      console.error("Failed to toggle like:", error);
+    }
+  };
+
+  const handleCommentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newComment.trim() || !post) return;
+
+    try {
+      const commentData = {
+        post_id: postId,
+        content: newComment.trim(),
+      };
+
+      const newCommentResponse = await ForumAPI.createComment(commentData);
+      setComments([...comments, newCommentResponse]);
+      setNewComment("");
+
+      // 댓글 수 업데이트
+      setPost({
+        ...post,
+        replies: post.replies + 1,
+      });
+    } catch (error) {
+      console.error("Failed to create comment:", error);
+    }
+  };
+
+  if (loading) {
+    return (
+      <PageLayout>
+        <div className="flex justify-center items-center h-64">
+          <div className="text-gray-700 text-xl">로딩 중...</div>
+        </div>
+      </PageLayout>
+    );
+  }
+
+  if (error || (!loading && !post)) {
+    return (
+      <PageLayout>
+        <div className="flex justify-center items-center h-64">
+          <div className="text-gray-700 text-xl">
+            {error || "게시글을 찾을 수 없습니다."}
+          </div>
+        </div>
+      </PageLayout>
+    );
+  }
+
+  return (
+    <PageLayout className="p-4">
+      <div className="space-y-4">
+        {/* 뒤로 가기 버튼 */}
+        <button
+          onClick={() => router.back()}
+          className="flex items-center text-gray-700 hover:text-blue-600 transition-colors"
+        >
+          <svg
+            className="w-5 h-5 mr-2"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 19l-7-7 7-7"
+            />
+          </svg>
+          목록으로 돌아가기
+        </button>
+
+        {/* 게시글 내용 */}
+        <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+          {/* 카테고리 */}
+          <div className="mb-4">
+            <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-sm">
+              {post.category === "free"
+                ? "자유"
+                : post.category === "trolley"
+                  ? "트롤리 딜레마"
+                  : post.category === "brain_vat"
+                    ? "통 속의 뇌"
+                    : post.category === "prisoner"
+                      ? "죄수의 딜레마"
+                      : "테세우스의 배"}
+            </span>
+          </div>
+
+          {/* 제목 */}
+          <h1 className="text-xl font-bold text-gray-900 mb-4">{post.title}</h1>
+
+          {/* 작성자 정보 */}
+          <div className="flex items-center justify-between text-gray-500 text-sm mb-6 pb-4 border-b border-gray-200">
+            <div className="flex items-center space-x-4">
+              <span className="font-medium">
+                {post.author?.username || "Unknown"}
+              </span>
+              <span>{new Date(post.created_at).toLocaleDateString()}</span>
+            </div>
+            <div className="flex items-center space-x-4">
+              <span>조회 {post.views_count}</span>
+              <span>댓글 {post.comments_count}</span>
+            </div>
+          </div>
+
+          {/* 본문 */}
+          <div className="text-gray-700 mb-6 leading-relaxed">
+            {post.content}
+          </div>
+
+          {/* 좋아요 버튼 */}
+          <div className="flex items-center justify-between">
+            <button
+              onClick={handleLike}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all ${
+                isLiked
+                  ? "bg-red-500 text-white"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              }`}
+            >
+              <svg
+                className="w-5 h-5"
+                fill={isLiked ? "currentColor" : "none"}
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                />
+              </svg>
+              <span>{post.likes_count}</span>
+            </button>
+          </div>
+        </div>
+
+        {/* 댓글 섹션 */}
+        <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+          <h2 className="text-lg font-bold text-gray-900 mb-4">
+            댓글 ({comments.length})
+          </h2>
+
+          {/* 댓글 작성 폼 */}
+          <form onSubmit={handleCommentSubmit} className="mb-6">
+            <textarea
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              placeholder="댓글을 작성해주세요..."
+              className="w-full p-3 rounded-lg bg-gray-50 text-gray-700 placeholder-gray-400 border border-gray-200 focus:border-blue-400 focus:outline-none resize-none"
+              rows={3}
+            />
+            <div className="flex justify-end mt-3">
+              <button
+                type="submit"
+                disabled={!newComment.trim()}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+              >
+                댓글 작성
+              </button>
+            </div>
+          </form>
+
+          {/* 댓글 목록 */}
+          <div className="space-y-4">
+            {comments.map((comment) => (
+              <div key={comment.id} className="bg-gray-50 rounded-lg p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-medium text-gray-900">
+                    {comment.author?.username || "Unknown"}
+                  </span>
+                  <span className="text-gray-500 text-sm">
+                    {new Date(comment.created_at).toLocaleDateString()}
+                  </span>
+                </div>
+                <p className="text-gray-700 mb-3">{comment.content}</p>
+                <button className="flex items-center space-x-2 text-gray-500 hover:text-red-500 transition-colors">
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                    />
+                  </svg>
+                  <span>{comment.likes_count || 0}</span>
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </PageLayout>
+  );
+}

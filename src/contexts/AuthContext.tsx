@@ -20,12 +20,23 @@ interface AuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
+  loginWithKakao: (
+    accessToken: string,
+    profile: KakaoUserProfile
+  ) => Promise<void>;
   register: (
     email: string,
     password: string,
     displayName?: string
   ) => Promise<void>;
   logout: () => void;
+}
+
+interface KakaoUserProfile {
+  id: string;
+  nickname: string;
+  email: string;
+  profileImage: string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -151,6 +162,45 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     localStorage.setItem("auth_token", access_token);
   };
 
+  const loginWithKakao = async (
+    accessToken: string,
+    profile: KakaoUserProfile
+  ) => {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/auth/kakao`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          accessToken,
+          profile: {
+            id: profile.id,
+            nickname: profile.nickname,
+            email: profile.email,
+            profileImage: profile.profileImage,
+          },
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "카카오 로그인에 실패했습니다.");
+    }
+
+    const { user: userData, access_token } = await response.json();
+
+    setUser({
+      id: userData.id,
+      email: userData.email,
+      displayName: userData.displayName,
+    });
+    setToken(access_token);
+    localStorage.setItem("auth_token", access_token);
+  };
+
   const logout = () => {
     setUser(null);
     setToken(null);
@@ -163,6 +213,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     isLoading,
     isAuthenticated: !!user,
     login,
+    loginWithKakao,
     register,
     logout,
   };

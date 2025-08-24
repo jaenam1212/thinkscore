@@ -10,6 +10,7 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@types/kakao-js-sdk": "^1.39.5",
     "gsap": "^3.13.0",
     "motion": "^12.23.12",
     "next": "15.4.6",

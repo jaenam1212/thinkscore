@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import KakaoLoginButton from "./KakaoLoginButton";
+import { KakaoProfile } from "@/lib/kakao";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -9,6 +12,7 @@ interface LoginModalProps {
 
 export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const { loginWithKakao } = useAuth();
 
   const handleSocialLogin = async (provider: string) => {
     setIsLoading(true);
@@ -18,6 +22,25 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
       console.error("Login error:", error);
       setIsLoading(false);
     }
+  };
+
+  const handleKakaoSuccess = async (
+    profile: KakaoProfile,
+    accessToken: string
+  ) => {
+    try {
+      await loginWithKakao(accessToken, profile);
+      console.log("카카오 로그인 성공:", profile);
+      onClose();
+    } catch (error) {
+      console.error("카카오 로그인 처리 실패:", error);
+      alert("로그인 처리 중 오류가 발생했습니다.");
+    }
+  };
+
+  const handleKakaoError = (error: Error) => {
+    console.error("카카오 로그인 실패:", error);
+    alert("카카오 로그인에 실패했습니다. 다시 시도해 주세요.");
   };
 
   if (!isOpen) return null;
@@ -59,19 +82,12 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
             <span>Google로 로그인</span>
           </button>
 
-          <button
-            onClick={() => handleSocialLogin("kakao")}
+          <KakaoLoginButton
+            onSuccess={handleKakaoSuccess}
+            onError={handleKakaoError}
             disabled={isLoading}
-            className="w-full flex items-center justify-center space-x-3 bg-yellow-400 rounded-lg px-4 py-3 text-gray-900 hover:bg-yellow-500 disabled:opacity-50"
-          >
-            <svg className="w-5 h-5" viewBox="0 0 24 24">
-              <path
-                fill="currentColor"
-                d="M12 3c5.799 0 10.5 3.664 10.5 8.185 0 4.52-4.701 8.184-10.5 8.184a13.5 13.5 0 0 1-1.727-.11l-4.408 2.883c-.501.265-.678.236-.472-.413l.892-3.678c-2.88-1.46-4.785-3.99-4.785-6.866C1.5 6.665 6.201 3 12 3z"
-              />
-            </svg>
-            <span>카카오로 로그인</span>
-          </button>
+            className="w-full"
+          />
 
           <button
             onClick={() => handleSocialLogin("naver")}
