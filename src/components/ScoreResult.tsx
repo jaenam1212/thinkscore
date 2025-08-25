@@ -35,8 +35,12 @@ export default function ScoreResult({
     ? parseImprovement(feedback)
     : "추가 개선 사항을 검토해보세요.";
 
-  // 영문 키를 한글로 매핑
+  // 이미 한국어로 온 경우 그대로 사용, 혹시 영어로 온 경우 매핑
   const criteriaMapping: Record<string, string> = {
+    "논리적 사고": "논리적 사고",
+    "창의적 사고": "창의적 사고",
+    일관성: "일관성",
+    // 혹시 이전 데이터에서 영어로 온 경우 대비
     conceptual_analysis: "논리적 사고",
     logical_reasoning: "창의적 사고",
     interpretive_depth: "일관성",

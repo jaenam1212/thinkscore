@@ -515,7 +515,7 @@ ${additionalThoughts.trim()}`
                   {/* 추가 생각 입력 */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      🤔 추가로 하고 싶은 말 (선택사항)
+                      추가로 하고 싶은 말 (선택사항)
                     </label>
                     <textarea
                       value={additionalThoughts}
