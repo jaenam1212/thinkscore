@@ -4,6 +4,7 @@ import LeftSidebar from "@/components/layout/LeftSidebar";
 import RightSidebar from "@/components/layout/RightSidebar";
 import BottomNavigation from "@/components/layout/BottomNavigation";
 import { useAuth } from "@/contexts/AuthContext";
+import AppHeader from "@/components/layout/AppHeader";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { answerService, scoreService, questionService } from "@/lib/services";
@@ -192,15 +193,7 @@ export default function ProfilePage() {
 
       {/* 메인 모바일 뷰 */}
       <div className="min-h-screen bg-stone-50 flex flex-col w-full max-w-md mx-auto md:border-x md:border-gray-200 relative lg:flex-shrink-0">
-        {/* 헤더 */}
-        <header className="flex items-center justify-center p-4 border-b border-gray-200 bg-stone-50 sticky top-0 z-10">
-          <div className="flex items-center space-x-3">
-            <div>
-              <h1 className="text-xl font-bold text-gray-900">프로필</h1>
-              <p className="text-sm text-gray-500">내 정보 및 활동</p>
-            </div>
-          </div>
-        </header>
+        <AppHeader title="프로필" subtitle="내 정보 및 활동" />
 
         {/* 메인 컨텐츠 */}
         <div className="flex-1 overflow-y-auto pb-32">

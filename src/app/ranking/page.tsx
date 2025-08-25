@@ -4,6 +4,7 @@ import { useState } from "react";
 import LeftSidebar from "@/components/layout/LeftSidebar";
 import RightSidebar from "@/components/layout/RightSidebar";
 import BottomNavigation from "@/components/layout/BottomNavigation";
+import AppHeader from "@/components/layout/AppHeader";
 
 export default function RankingPage() {
   const [activeTab, setActiveTab] = useState<"overall" | "single">("overall");
@@ -128,13 +129,7 @@ export default function RankingPage() {
 
       {/* 메인 모바일 뷰 */}
       <div className="min-h-screen bg-stone-50 flex flex-col w-full max-w-md mx-auto md:border-x md:border-gray-200 relative lg:flex-shrink-0">
-        {/* 헤더 */}
-        <header className="p-4 border-b border-gray-200 bg-stone-50 sticky top-0 z-10">
-          <div className="text-center mb-4">
-            <h1 className="text-xl font-bold text-gray-900">랭킹</h1>
-            <p className="text-sm text-gray-500">사용자 순위</p>
-          </div>
-
+        <AppHeader title="랭킹" subtitle="사용자 순위">
           {/* 탭 메뉴 */}
           <div className="flex bg-gray-100 rounded-xl p-1">
             <button
@@ -158,7 +153,7 @@ export default function RankingPage() {
               문제별 랭킹
             </button>
           </div>
-        </header>
+        </AppHeader>
 
         {/* 메인 컨텐츠 */}
         <div className="flex-1 overflow-y-auto pb-32">
