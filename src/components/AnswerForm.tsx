@@ -91,7 +91,7 @@ export default function AnswerForm({
     <div className="fixed bottom-16 left-0 right-0 max-w-md mx-auto p-4 bg-stone-50 border-t border-gray-200 z-10">
       {/* 평가 중일 때 전체 화면 로딩 모달 */}
       {isEvaluating && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg max-w-lg w-full">
             <div className="p-6">
               <div className="text-center mb-6">

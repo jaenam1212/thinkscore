@@ -1,17 +1,11 @@
 "use client";
 
-import { useState } from "react";
 import QuizContainer from "@/components/QuizContainer";
 import LeftSidebar from "@/components/layout/LeftSidebar";
 import RightSidebar from "@/components/layout/RightSidebar";
 import BottomNavigation from "@/components/layout/BottomNavigation";
-import LoginModal from "@/components/auth/LoginModal";
-import { useAuth } from "@/contexts/AuthContext";
 
 export default function Home() {
-  const { user, isAuthenticated, logout } = useAuth();
-  const [showLoginModal, setShowLoginModal] = useState(false);
-
   return (
     <div className="min-h-screen bg-gray-100 flex">
       {/* PC 왼쪽 사이드바 */}
@@ -38,12 +32,6 @@ export default function Home() {
 
       {/* PC 오른쪽 사이드바 */}
       <RightSidebar />
-
-      {/* 로그인 모달 */}
-      <LoginModal
-        isOpen={showLoginModal}
-        onClose={() => setShowLoginModal(false)}
-      />
     </div>
   );
 }

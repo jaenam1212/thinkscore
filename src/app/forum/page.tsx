@@ -317,7 +317,7 @@ ${additionalThoughts.trim()}`
 
       {/* 새 토론 작성 모달 */}
       {showNewPostModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-hidden">
             {/* 모달 헤더 */}
             <div className="flex items-center justify-between p-4 border-b border-gray-200">
@@ -408,7 +408,7 @@ ${additionalThoughts.trim()}`
 
       {/* 점수 공유 모달 */}
       {showScoreModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-hidden">
             {/* 모달 헤더 */}
             <div className="flex items-center justify-between p-4 border-b border-gray-200">

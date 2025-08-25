@@ -48,7 +48,7 @@ export default function LoginForm({
   };
 
   return (
-    <div className="max-w-md mx-auto bg-white rounded-2xl shadow-lg p-6">
+    <div className="w-full max-w-2xl mx-auto bg-white rounded-2xl shadow-lg p-6 sm:p-8">
       <div className="text-center mb-6">
         <h2 className="text-2xl font-bold text-gray-800">로그인</h2>
         <p className="text-gray-600 mt-2">계정에 로그인하세요</p>
@@ -60,11 +60,11 @@ export default function LoginForm({
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-5">
         <div>
           <label
             htmlFor="email"
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="block text-sm font-medium text-gray-700 mb-2"
           >
             이메일
           </label>
@@ -73,7 +73,7 @@ export default function LoginForm({
             id="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-slate-500"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent text-base"
             placeholder="your@email.com"
             required
             disabled={isLoading}
@@ -83,7 +83,7 @@ export default function LoginForm({
         <div>
           <label
             htmlFor="password"
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="block text-sm font-medium text-gray-700 mb-2"
           >
             비밀번호
           </label>
@@ -92,7 +92,7 @@ export default function LoginForm({
             id="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-slate-500"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent text-base"
             placeholder="••••••••"
             required
             disabled={isLoading}
@@ -102,7 +102,7 @@ export default function LoginForm({
         <button
           type="submit"
           disabled={isLoading || !email.trim() || !password.trim()}
-          className="w-full bg-slate-800 hover:bg-slate-900 disabled:bg-gray-400 text-white py-2 px-4 rounded-lg font-medium transition-colors"
+          className="w-full bg-slate-800 hover:bg-slate-900 disabled:bg-gray-400 text-white py-3 px-4 rounded-lg font-medium transition-colors text-base"
         >
           {isLoading ? "로그인 중..." : "로그인"}
         </button>
@@ -120,7 +120,7 @@ export default function LoginForm({
         <button
           onClick={() => alert("Google 로그인 (준비 중)")}
           disabled={isLoading}
-          className="w-full flex items-center justify-center space-x-3 bg-white border border-gray-300 hover:bg-gray-50 disabled:bg-gray-100 text-gray-700 py-2.5 px-4 rounded-lg font-medium transition-colors"
+          className="w-full flex items-center justify-center space-x-3 bg-white border border-gray-300 hover:bg-gray-50 disabled:bg-gray-100 text-gray-700 py-3 px-4 rounded-lg font-medium transition-colors text-base"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path
@@ -140,36 +140,36 @@ export default function LoginForm({
               d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
             />
           </svg>
-          <span>Google로 로그인</span>
+          <span>Google로 시작하기</span>
         </button>
 
         <button
           onClick={() => alert("Naver 로그인 (준비 중)")}
           disabled={isLoading}
-          className="w-full flex items-center justify-center space-x-3 bg-green-500 hover:bg-green-600 disabled:bg-gray-100 text-white py-2.5 px-4 rounded-lg font-medium transition-colors"
+          className="w-full flex items-center justify-center space-x-3 bg-green-500 hover:bg-green-600 disabled:bg-gray-100 text-white py-3 px-4 rounded-lg font-medium transition-colors text-base"
         >
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
             <path d="M16.273 12.845 7.376 0H0v24h7.726V11.156L16.624 24H24V0h-7.727v12.845z" />
           </svg>
-          <span>네이버로 로그인</span>
+          <span>네이버로 시작하기</span>
         </button>
 
         <KakaoLoginButton
           onSuccess={handleKakaoSuccess}
           onError={handleKakaoError}
           disabled={isLoading}
-          className="w-full py-2.5 px-4"
+          className="w-full py-3 px-4"
         />
 
         <button
           onClick={() => alert("Apple 로그인 (준비 중)")}
           disabled={isLoading}
-          className="w-full flex items-center justify-center space-x-3 bg-black hover:bg-gray-800 disabled:bg-gray-100 text-white py-2.5 px-4 rounded-lg font-medium transition-colors"
+          className="w-full flex items-center justify-center space-x-3 bg-black hover:bg-gray-800 disabled:bg-gray-100 text-white py-3 px-4 rounded-lg font-medium transition-colors text-base"
         >
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
             <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
           </svg>
-          <span>Apple로 로그인</span>
+          <span>Apple로 시작하기</span>
         </button>
       </div>
 
