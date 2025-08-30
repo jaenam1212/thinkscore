@@ -8,7 +8,7 @@ import AppHeader from "@/components/layout/AppHeader";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { answerService, scoreService, questionService } from "@/lib/services";
-import { Answer, Score, Question } from "@/lib/database.types";
+import { Answer } from "@/lib/database.types";
 import ScoreResult from "@/components/ScoreResult";
 
 interface AnswerWithScore extends Answer {
