@@ -28,27 +28,26 @@ export default function ForumPostPage() {
         setError(null);
 
         // 게시글과 댓글 데이터를 병렬로 가져오기
-        const promises = [
+        const [postData, commentsData] = await Promise.all([
           ForumAPI.getPost(postId),
           ForumAPI.getComments(postId),
-        ];
-
-        // 로그인된 사용자의 경우 좋아요 상태와 어드민 상태도 가져오기
-        if (isAuthenticated) {
-          promises.push(ForumAPI.getLikeStatus(postId));
-          promises.push(ForumAPI.checkAdminStatus());
-        }
-
-        const [postData, commentsData, likeStatusData, adminStatusData] =
-          await Promise.all(promises);
+        ]);
 
         setPost(postData);
         setComments(commentsData);
 
-        // 좋아요 상태와 어드민 상태 설정 (로그인된 사용자만)
-        if (isAuthenticated && likeStatusData && adminStatusData) {
-          setIsLiked(likeStatusData.liked);
-          setIsAdmin(adminStatusData.isAdmin);
+        // 로그인된 사용자의 경우 좋아요 상태와 어드민 상태도 가져오기
+        if (isAuthenticated) {
+          const [likeStatusData, adminStatusData] = await Promise.all([
+            ForumAPI.getLikeStatus(postId),
+            ForumAPI.checkAdminStatus(),
+          ]);
+
+          // 좋아요 상태와 어드민 상태 설정
+          if (likeStatusData && adminStatusData) {
+            setIsLiked(likeStatusData.liked);
+            setIsAdmin(adminStatusData.isAdmin);
+          }
         } else {
           setIsLiked(false);
           setIsAdmin(false);
