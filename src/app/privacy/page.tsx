@@ -1,9 +1,23 @@
+"use client";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "개인정보 처리방침",
   description: "ThinkScore의 개인정보 처리방침",
 };
+
+// 클라이언트 컴포넌트로 버튼 분리
+
+function BackButton() {
+  return (
+    <button
+      onClick={() => window.history.back()}
+      className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+    >
+      이전 페이지로 돌아가기
+    </button>
+  );
+}
 
 export default function PrivacyPage() {
   return (
@@ -200,12 +214,7 @@ export default function PrivacyPage() {
           </div>
 
           <div className="mt-12 pt-6 border-t text-center">
-            <button
-              onClick={() => window.history.back()}
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              이전 페이지로 돌아가기
-            </button>
+            <BackButton />
           </div>
         </div>
       </div>
