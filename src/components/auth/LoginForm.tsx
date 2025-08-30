@@ -4,6 +4,8 @@ import { useState } from "react";
 import KakaoLoginButton from "./KakaoLoginButton";
 import { KakaoProfile } from "@/lib/kakao";
 import { useAuth } from "@/contexts/AuthContext";
+import PrivacyModal from "./PrivacyModal";
+import TermsModal from "./TermsModal";
 
 interface LoginFormProps {
   onLogin: (email: string, password: string) => Promise<void>;
@@ -20,6 +22,8 @@ export default function LoginForm({
 }: LoginFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
   const { loginWithKakao } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -185,6 +189,37 @@ export default function LoginForm({
           </button>
         </p>
       </div>
+
+      {/* 개인정보 처리방침 및 이용약관 */}
+      <div className="mt-6 pt-4 border-t border-gray-200 text-center">
+        <p className="text-xs text-gray-500">
+          로그인 시{" "}
+          <button
+            onClick={() => setShowTermsModal(true)}
+            className="text-blue-600 hover:text-blue-800 underline"
+          >
+            서비스 이용약관
+          </button>{" "}
+          및{" "}
+          <button
+            onClick={() => setShowPrivacyModal(true)}
+            className="text-blue-600 hover:text-blue-800 underline"
+          >
+            개인정보 처리방침
+          </button>
+          에 동의하는 것으로 간주됩니다.
+        </p>
+      </div>
+
+      {/* 모달들 */}
+      <PrivacyModal
+        isOpen={showPrivacyModal}
+        onClose={() => setShowPrivacyModal(false)}
+      />
+      <TermsModal
+        isOpen={showTermsModal}
+        onClose={() => setShowTermsModal(false)}
+      />
     </div>
   );
 }

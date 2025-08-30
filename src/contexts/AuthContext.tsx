@@ -24,6 +24,10 @@ interface AuthContextType {
     accessToken: string,
     profile: KakaoUserProfile
   ) => Promise<void>;
+  loginWithNaver: (
+    accessToken: string,
+    profile: NaverUserProfile
+  ) => Promise<void>;
   register: (
     email: string,
     password: string,
@@ -37,6 +41,13 @@ interface KakaoUserProfile {
   nickname: string;
   email: string;
   profileImage: string;
+}
+
+interface NaverUserProfile {
+  id: string;
+  nickname: string;
+  email: string;
+  profile_image: string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -201,6 +212,45 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     localStorage.setItem("auth_token", access_token);
   };
 
+  const loginWithNaver = async (
+    accessToken: string,
+    profile: NaverUserProfile
+  ) => {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/auth/naver`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          accessToken,
+          profile: {
+            id: profile.id,
+            nickname: profile.nickname,
+            email: profile.email,
+            profile_image: profile.profile_image,
+          },
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "네이버 로그인에 실패했습니다.");
+    }
+
+    const { user: userData, access_token } = await response.json();
+
+    setUser({
+      id: userData.id,
+      email: userData.email,
+      displayName: userData.displayName,
+    });
+    setToken(access_token);
+    localStorage.setItem("auth_token", access_token);
+  };
+
   const logout = () => {
     setUser(null);
     setToken(null);
@@ -214,6 +264,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     isAuthenticated: !!user,
     login,
     loginWithKakao,
+    loginWithNaver,
     register,
     logout,
   };

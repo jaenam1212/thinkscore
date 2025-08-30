@@ -4,16 +4,19 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import PageLayout from "@/components/layout/PageLayout";
 import { ForumAPI, ForumPost, ForumComment } from "@/lib/forum-api";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function ForumPostPage() {
   const params = useParams();
   const router = useRouter();
+  const { isAuthenticated } = useAuth();
   const postId = parseInt(params.id as string);
 
   const [post, setPost] = useState<ForumPost | null>(null);
   const [comments, setComments] = useState<ForumComment[]>([]);
   const [newComment, setNewComment] = useState("");
   const [isLiked, setIsLiked] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -25,13 +28,31 @@ export default function ForumPostPage() {
         setError(null);
 
         // 게시글과 댓글 데이터를 병렬로 가져오기
-        const [postData, commentsData] = await Promise.all([
+        const promises = [
           ForumAPI.getPost(postId),
           ForumAPI.getComments(postId),
-        ]);
+        ];
+
+        // 로그인된 사용자의 경우 좋아요 상태와 어드민 상태도 가져오기
+        if (isAuthenticated) {
+          promises.push(ForumAPI.getLikeStatus(postId));
+          promises.push(ForumAPI.checkAdminStatus());
+        }
+
+        const [postData, commentsData, likeStatusData, adminStatusData] =
+          await Promise.all(promises);
 
         setPost(postData);
         setComments(commentsData);
+
+        // 좋아요 상태와 어드민 상태 설정 (로그인된 사용자만)
+        if (isAuthenticated && likeStatusData && adminStatusData) {
+          setIsLiked(likeStatusData.liked);
+          setIsAdmin(adminStatusData.isAdmin);
+        } else {
+          setIsLiked(false);
+          setIsAdmin(false);
+        }
       } catch (err) {
         console.error("Failed to fetch post data:", err);
         setError("게시글을 불러오는데 실패했습니다.");
@@ -46,10 +67,10 @@ export default function ForumPostPage() {
       setError("잘못된 게시글 ID입니다.");
       setLoading(false);
     }
-  }, [postId]);
+  }, [postId, isAuthenticated]);
 
   const handleLike = async () => {
-    if (!post) return;
+    if (!post || !isAuthenticated) return;
 
     try {
       const result = await ForumAPI.toggleLike(postId);
@@ -60,6 +81,22 @@ export default function ForumPostPage() {
       });
     } catch (error) {
       console.error("Failed to toggle like:", error);
+    }
+  };
+
+  const handleAdminDelete = async () => {
+    if (!post || !isAdmin) return;
+
+    const confirmed = confirm("정말로 이 게시글을 삭제하시겠습니까?");
+    if (!confirmed) return;
+
+    try {
+      await ForumAPI.adminDeletePost(postId);
+      alert("게시글이 삭제되었습니다.");
+      router.push("/forum");
+    } catch (error) {
+      console.error("Failed to delete post:", error);
+      alert("게시글 삭제에 실패했습니다.");
     }
   };
 
@@ -115,26 +152,51 @@ export default function ForumPostPage() {
   return (
     <PageLayout className="p-4">
       <div className="space-y-4">
-        {/* 뒤로 가기 버튼 */}
-        <button
-          onClick={() => router.back()}
-          className="flex items-center text-gray-700 hover:text-blue-600 transition-colors"
-        >
-          <svg
-            className="w-5 h-5 mr-2"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+        {/* 상단 버튼들 */}
+        <div className="flex items-center justify-between">
+          <button
+            onClick={() => router.back()}
+            className="flex items-center text-gray-700 hover:text-blue-600 transition-colors"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 19l-7-7 7-7"
-            />
-          </svg>
-          목록으로 돌아가기
-        </button>
+            <svg
+              className="w-5 h-5 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+            목록으로 돌아가기
+          </button>
+
+          {/* 어드민 삭제 버튼 */}
+          {isAdmin && (
+            <button
+              onClick={handleAdminDelete}
+              className="flex items-center text-red-600 hover:text-red-800 transition-colors"
+            >
+              <svg
+                className="w-5 h-5 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                />
+              </svg>
+              관리자 삭제
+            </button>
+          )}
+        </div>
 
         {/* 게시글 내용 */}
         <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
@@ -179,11 +241,15 @@ export default function ForumPostPage() {
           <div className="flex items-center justify-between">
             <button
               onClick={handleLike}
+              disabled={!isAuthenticated}
               className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all ${
-                isLiked
-                  ? "bg-red-500 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                !isAuthenticated
+                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                  : isLiked
+                    ? "bg-red-500 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
+              title={!isAuthenticated ? "로그인이 필요합니다" : undefined}
             >
               <svg
                 className="w-5 h-5"

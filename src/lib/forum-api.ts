@@ -130,4 +130,23 @@ export class ForumAPI {
       {}
     );
   }
+
+  // 좋아요 상태 확인
+  static async getLikeStatus(postId: number): Promise<{ liked: boolean }> {
+    return apiClient.get<{ liked: boolean }>(
+      `/forum/posts/${postId}/like-status`
+    );
+  }
+
+  // 어드민: 게시글 삭제
+  static async adminDeletePost(postId: number): Promise<{ success: boolean }> {
+    return apiClient.delete<{ success: boolean }>(
+      `/forum/admin/posts/${postId}`
+    );
+  }
+
+  // 어드민 상태 확인
+  static async checkAdminStatus(): Promise<{ isAdmin: boolean }> {
+    return apiClient.get<{ isAdmin: boolean }>("/forum/admin/check");
+  }
 }

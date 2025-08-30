@@ -148,7 +148,7 @@ export default function ProfilePage() {
   // 프로필 데이터
   const profileData = {
     name: user?.displayName || "사용자",
-    email: user?.email || "user@example.com",
+    email: user?.email || "이메일 미제공",
     totalTests: recentAnswers.length,
     averageScore:
       recentAnswers.length > 0

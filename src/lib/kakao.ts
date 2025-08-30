@@ -23,55 +23,103 @@ declare global {
 export const initializeKakao = (): Promise<boolean> => {
   return new Promise((resolve) => {
     if (typeof window === "undefined") {
+      console.log("서버 사이드 환경에서는 카카오 SDK를 초기화할 수 없습니다");
       resolve(false);
       return;
     }
 
     let attempts = 0;
-    const maxAttempts = 50; // 5초 최대 대기
+    const maxAttempts = 100; // 10초 최대 대기 (더 여유롭게)
 
     const checkKakaoSDK = () => {
       attempts++;
 
       console.log(`카카오 SDK 확인 중... (${attempts}/${maxAttempts})`, {
+        window: typeof window !== "undefined",
         Kakao: !!window.Kakao,
         init: !!window.Kakao?.init,
         Auth: !!window.Kakao?.Auth,
         API: !!window.Kakao?.API,
+        isInitialized: window.Kakao?.isInitialized?.(),
       });
 
-      if (
-        window.Kakao &&
-        window.Kakao.init &&
-        window.Kakao.Auth &&
-        window.Kakao.API
-      ) {
-        if (!window.Kakao.isInitialized()) {
-          try {
-            // 카카오 JavaScript 키 (공개용 키이므로 하드코딩 OK)
-            window.Kakao.init("wttgQsnQEIssuk9xW8B4S6uK9gOF6oFY");
-            console.log("카카오 SDK 초기화 완료");
+      if (window.Kakao) {
+        console.log("카카오 SDK 객체 발견:", Object.keys(window.Kakao));
+
+        // Auth와 API가 없는 경우 SDK 로딩이 완전하지 않은 상태
+        if (!window.Kakao.Auth || !window.Kakao.API) {
+          console.log(
+            `SDK 모듈 로딩 중... Auth: ${!!window.Kakao.Auth}, API: ${!!window.Kakao.API}`
+          );
+          // 계속 대기
+        } else if (window.Kakao.init) {
+          if (!window.Kakao.isInitialized()) {
+            try {
+              // 카카오 JavaScript 키 (공개용 키이므로 하드코딩 OK)
+              window.Kakao.init("2e88ef8df1d85ed606a1c6d423fcdd9a");
+              console.log("✅ 카카오 SDK 초기화 완료");
+              resolve(true);
+              return;
+            } catch (error) {
+              console.error("❌ 카카오 SDK 초기화 실패:", error);
+              resolve(false);
+              return;
+            }
+          } else {
+            console.log("✅ 카카오 SDK 이미 초기화됨");
             resolve(true);
-          } catch (error) {
-            console.error("카카오 SDK 초기화 실패:", error);
-            resolve(false);
+            return;
           }
-        } else {
-          console.log("카카오 SDK 이미 초기화됨");
-          resolve(true);
         }
-      } else if (attempts < maxAttempts) {
+      }
+
+      if (attempts < maxAttempts) {
         setTimeout(checkKakaoSDK, 100);
       } else {
-        console.error("카카오 SDK 로딩 타임아웃");
+        console.error(
+          "❌ 카카오 SDK 로딩 타임아웃 - 네트워크 문제이거나 스크립트가 차단되었을 수 있습니다"
+        );
+        console.log("현재 상태:", {
+          scriptLoaded: !!document.querySelector('script[src*="kakao"]'),
+          windowKakao: !!window.Kakao,
+          networkStatus: navigator.onLine ? "온라인" : "오프라인",
+        });
         resolve(false);
       }
     };
 
+    // 즉시 한 번 체크하고, 없으면 대기
     checkKakaoSDK();
   });
 };
 
+// REST API 방식 리다이렉트 로그인 (SDK 불필요)
+export const kakaoLoginRestAPI = () => {
+  const KAKAO_CLIENT_ID = "2e88ef8df1d85ed606a1c6d423fcdd9a"; // JavaScript 키
+  const REDIRECT_URI = "http://localhost:3000/auth/kakao/callback"; // 하드코딩으로 일관성 확보
+
+  const kakaoAuthURL =
+    `https://kauth.kakao.com/oauth/authorize?` +
+    `client_id=${KAKAO_CLIENT_ID}&` +
+    `redirect_uri=${encodeURIComponent(REDIRECT_URI)}&` +
+    `response_type=code&` +
+    `scope=profile_nickname,profile_image`; // 이메일 제거
+
+  console.log("카카오 REST API 로그인 리다이렉트:", {
+    client_id: KAKAO_CLIENT_ID,
+    redirect_uri: REDIRECT_URI,
+    full_url: kakaoAuthURL,
+  });
+  window.location.href = kakaoAuthURL;
+};
+
+// 리다이렉트 방식 카카오 로그인 (REST API 우선)
+export const kakaoLoginRedirect = () => {
+  console.log("카카오 로그인: REST API 방식 직접 사용");
+  kakaoLoginRestAPI();
+};
+
+// 기존 팝업 방식 (백업용)
 export const kakaoLogin = (): Promise<{
   accessToken: string;
   profile: KakaoProfile;
