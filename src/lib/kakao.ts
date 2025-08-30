@@ -108,7 +108,7 @@ export const kakaoLoginRestAPI = () => {
     `client_id=${KAKAO_CLIENT_ID}&` +
     `redirect_uri=${encodeURIComponent(REDIRECT_URI)}&` +
     `response_type=code&` +
-    `scope=profile_nickname,profile_image`; // 이메일 제거
+    `scope=profile_nickname,account_email`; // 이메일 필수, 닉네임 선택
 
   console.log("카카오 REST API 로그인 리다이렉트:", {
     client_id: KAKAO_CLIENT_ID,

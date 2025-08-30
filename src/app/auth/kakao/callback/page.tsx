@@ -3,6 +3,14 @@
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
+import UserInfoModal from "@/components/auth/UserInfoModal";
+
+interface KakaoCallbackProfile {
+  id: string;
+  nickname?: string;
+  email: string;
+  profileImage?: string;
+}
 
 // 전역 플래그로 중복 처리 방지
 let isProcessingGlobal = false;
@@ -10,9 +18,13 @@ let isProcessingGlobal = false;
 function KakaoCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { loginWithKakao, isAuthenticated } = useAuth();
+  const { loginWithKakao, isAuthenticated, updateUserInfo } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showUserInfoModal, setShowUserInfoModal] = useState(false);
+  const [kakaoProfile, setKakaoProfile] = useState<KakaoCallbackProfile | null>(
+    null
+  );
 
   useEffect(() => {
     const handleKakaoCallback = async () => {
@@ -85,8 +97,35 @@ function KakaoCallbackContent() {
         // 로그인 성공 시 코드를 세션에 저장 (중복 처리 방지)
         sessionStorage.setItem("kakao_processed_code", code);
 
-        await loginWithKakao(data.accessToken, data.profile);
-        router.push("/");
+        // 먼저 백엔드에서 카카오 로그인 시도
+        const backendResponse = await fetch("/api/auth/kakao", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            accessToken: data.accessToken,
+            profile: data.profile,
+          }),
+        });
+
+        if (!backendResponse.ok) {
+          throw new Error("Backend kakao login failed");
+        }
+
+        const backendData = await backendResponse.json();
+
+        // 추가 정보가 필요한 경우
+        if (backendData.requiresAdditionalInfo) {
+          sessionStorage.setItem("kakao_temp_token", data.accessToken);
+          setKakaoProfile(backendData.profile);
+          setShowUserInfoModal(true);
+          setLoading(false);
+        } else {
+          // 로그인 완료
+          await loginWithKakao(data.accessToken, data.profile);
+          router.push("/");
+        }
       } catch (error) {
         console.error("카카오 콜백 처리 실패:", error);
         setError("로그인 처리 중 오류가 발생했습니다.");
@@ -137,7 +176,74 @@ function KakaoCallbackContent() {
     );
   }
 
-  return null;
+  const handleUserInfoComplete = async (userInfo: {
+    email: string;
+    nickname: string;
+  }) => {
+    try {
+      // 업데이트된 프로필로 직접 서버에 저장
+      const updatedProfile = {
+        ...kakaoProfile,
+        email: userInfo.email,
+        nickname: userInfo.nickname,
+      };
+
+      // 백엔드 API 서버에 업데이트된 정보 저장
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/auth/kakao/complete`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            accessToken: sessionStorage.getItem("kakao_temp_token") || "",
+            profile: updatedProfile,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to save user info");
+      }
+
+      const userData = await response.json();
+
+      // AuthContext의 사용자 상태 직접 업데이트
+      if (userData.access_token && userData.user) {
+        updateUserInfo(
+          {
+            id: userData.user.id,
+            email: userData.user.email,
+            displayName: userData.user.displayName,
+          },
+          userData.access_token
+        );
+      }
+
+      setShowUserInfoModal(false);
+      router.push("/");
+    } catch (error) {
+      console.error("사용자 정보 완료 처리 실패:", error);
+      setError("로그인 처리 중 오류가 발생했습니다.");
+    }
+  };
+
+  return (
+    <>
+      {showUserInfoModal && kakaoProfile && (
+        <UserInfoModal
+          isOpen={showUserInfoModal}
+          onClose={() => {
+            setShowUserInfoModal(false);
+            router.push("/");
+          }}
+          onComplete={handleUserInfoComplete}
+          kakaoProfile={kakaoProfile}
+        />
+      )}
+    </>
+  );
 }
 
 export default function KakaoCallbackPage() {

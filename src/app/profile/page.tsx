@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import { answerService, scoreService, questionService } from "@/lib/services";
 import { Answer } from "@/lib/database.types";
 import ScoreResult from "@/components/ScoreResult";
+import ProfileEditModal from "@/components/auth/ProfileEditModal";
 
 interface AnswerWithScore extends Answer {
   question_title?: string;
@@ -20,7 +21,7 @@ interface AnswerWithScore extends Answer {
 }
 
 export default function ProfilePage() {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, logout, updateProfile } = useAuth();
   const router = useRouter();
   const [recentAnswers, setRecentAnswers] = useState<AnswerWithScore[]>([]);
   const [loading, setLoading] = useState(true);
@@ -28,6 +29,7 @@ export default function ProfilePage() {
     null
   );
   const [showScoreModal, setShowScoreModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   // 로그인하지 않은 경우 홈으로 리다이렉트
   useEffect(() => {
@@ -187,6 +189,13 @@ export default function ProfilePage() {
     setSelectedAnswer(null);
   };
 
+  const handleProfileSave = async (data: {
+    email: string;
+    displayName: string;
+  }) => {
+    await updateProfile(data);
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 flex">
       <LeftSidebar />
@@ -333,7 +342,10 @@ export default function ProfilePage() {
                     </svg>
                   </div>
                 </button>
-                <button className="w-full text-left p-4 hover:bg-gray-50 transition-colors">
+                <button
+                  onClick={() => setShowEditModal(true)}
+                  className="w-full text-left p-4 hover:bg-gray-50 transition-colors"
+                >
                   <div className="flex items-center justify-between">
                     <span className="text-gray-800">개인정보 수정</span>
                     <svg
@@ -399,6 +411,19 @@ export default function ProfilePage() {
             onClose={handleCloseScoreModal}
           />
         )}
+
+      {/* 프로필 수정 모달 */}
+      {showEditModal && user && (
+        <ProfileEditModal
+          isOpen={showEditModal}
+          onClose={() => setShowEditModal(false)}
+          onSave={handleProfileSave}
+          currentData={{
+            email: user.email || "",
+            displayName: user.displayName || "",
+          }}
+        />
+      )}
     </div>
   );
 }

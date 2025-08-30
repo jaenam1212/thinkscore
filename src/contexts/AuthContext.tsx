@@ -34,6 +34,11 @@ interface AuthContextType {
     displayName?: string
   ) => Promise<void>;
   logout: () => void;
+  updateUserInfo: (userData: User, accessToken: string) => void;
+  updateProfile: (data: {
+    email: string;
+    displayName: string;
+  }) => Promise<void>;
 }
 
 interface KakaoUserProfile {
@@ -100,7 +105,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           displayName: userData.displayName,
         });
       } else {
-        // 토큰이 유효하지 않으면 제거
         localStorage.removeItem("auth_token");
         setToken(null);
       }
@@ -201,7 +205,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       throw new Error(errorData.message || "카카오 로그인에 실패했습니다.");
     }
 
-    const { user: userData, access_token } = await response.json();
+    const responseData = await response.json();
+
+    // requiresAdditionalInfo가 있으면 추가 정보 입력 필요
+    if (responseData.requiresAdditionalInfo) {
+      throw new Error("REQUIRES_ADDITIONAL_INFO");
+    }
+
+    const { user: userData, access_token } = responseData;
 
     setUser({
       id: userData.id,
@@ -257,6 +268,45 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     localStorage.removeItem("auth_token");
   };
 
+  const updateUserInfo = (userData: User, accessToken: string) => {
+    setUser(userData);
+    setToken(accessToken);
+    localStorage.setItem("auth_token", accessToken);
+  };
+
+  const updateProfile = async (data: {
+    email: string;
+    displayName: string;
+  }) => {
+    if (!token) {
+      throw new Error("인증이 필요합니다.");
+    }
+
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/auth/profile`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "프로필 업데이트에 실패했습니다.");
+    }
+
+    const updatedUser = await response.json();
+    setUser({
+      id: updatedUser.id,
+      email: updatedUser.email,
+      displayName: updatedUser.displayName,
+    });
+  };
+
   const value = {
     user,
     token,
@@ -267,6 +317,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     loginWithNaver,
     register,
     logout,
+    updateUserInfo,
+    updateProfile,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

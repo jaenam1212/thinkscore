@@ -19,8 +19,11 @@ export async function POST(request: NextRequest) {
 
     // 카카오 토큰 교환 API 호출
     const clientId =
-      process.env.KAKAO_CLIENT_ID || "2e88ef8df1d85ed606a1c6d423fcdd9a";
-    const redirectUri = "http://localhost:3000/auth/kakao/callback"; // 하드코딩으로 일관성 확보
+      process.env.NEXT_PUBLIC_KAKAO_JS_KEY ||
+      "2e88ef8df1d85ed606a1c6d423fcdd9a";
+    const frontendUrl =
+      process.env.NEXT_PUBLIC_FRONTEND_URL || "http://localhost:3000";
+    const redirectUri = `${frontendUrl}/auth/kakao/callback`;
 
     console.log("토큰 교환 파라미터:", {
       client_id: clientId,
