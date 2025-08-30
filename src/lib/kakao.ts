@@ -55,8 +55,10 @@ export const initializeKakao = (): Promise<boolean> => {
         } else if (window.Kakao.init) {
           if (!window.Kakao.isInitialized()) {
             try {
-              // 카카오 JavaScript 키 (공개용 키이므로 하드코딩 OK)
-              window.Kakao.init("2e88ef8df1d85ed606a1c6d423fcdd9a");
+              const kakaoKey =
+                process.env.NEXT_PUBLIC_KAKAO_JS_KEY ||
+                "2e88ef8df1d85ed606a1c6d423fcdd9a";
+              window.Kakao.init(kakaoKey);
               console.log("✅ 카카오 SDK 초기화 완료");
               resolve(true);
               return;
@@ -95,8 +97,11 @@ export const initializeKakao = (): Promise<boolean> => {
 
 // REST API 방식 리다이렉트 로그인 (SDK 불필요)
 export const kakaoLoginRestAPI = () => {
-  const KAKAO_CLIENT_ID = "2e88ef8df1d85ed606a1c6d423fcdd9a"; // JavaScript 키
-  const REDIRECT_URI = "http://localhost:3000/auth/kakao/callback"; // 하드코딩으로 일관성 확보
+  const KAKAO_CLIENT_ID =
+    process.env.NEXT_PUBLIC_KAKAO_JS_KEY || "2e88ef8df1d85ed606a1c6d423fcdd9a";
+  const FRONTEND_URL =
+    process.env.NEXT_PUBLIC_FRONTEND_URL || "http://localhost:3000";
+  const REDIRECT_URI = `${FRONTEND_URL}/auth/kakao/callback`;
 
   const kakaoAuthURL =
     `https://kauth.kakao.com/oauth/authorize?` +
