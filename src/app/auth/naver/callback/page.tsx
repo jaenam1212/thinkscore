@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 
 // 전역 플래그로 중복 처리 방지
 let isProcessingGlobal = false;
 
-export default function NaverCallbackPage() {
+function NaverCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { loginWithNaver, isAuthenticated } = useAuth();
@@ -138,4 +138,21 @@ export default function NaverCallbackPage() {
   }
 
   return null;
+}
+
+export default function NaverCallbackPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto mb-4"></div>
+            <p className="text-gray-600">로딩 중...</p>
+          </div>
+        </div>
+      }
+    >
+      <NaverCallbackContent />
+    </Suspense>
+  );
 }
