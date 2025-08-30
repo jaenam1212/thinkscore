@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import BackButton from "@/components/ui/BackButton";
 
 export const metadata: Metadata = {
   title: "서비스 이용약관",
@@ -204,12 +205,7 @@ export default function TermsPage() {
           </div>
 
           <div className="mt-12 pt-6 border-t text-center">
-            <button
-              onClick={() => window.history.back()}
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              이전 페이지로 돌아가기
-            </button>
+            <BackButton />
           </div>
         </div>
       </div>
