@@ -20,6 +20,7 @@ export interface ForumPost {
 export interface ForumComment {
   id: number;
   content: string;
+  author_id: string;
   author: {
     username: string;
     avatar_url?: string;
@@ -120,6 +121,13 @@ export class ForumAPI {
     return apiClient.post<ForumComment, CreateCommentData>(
       "/forum/comments",
       data
+    );
+  }
+
+  // 댓글 삭제
+  static async deleteComment(commentId: number): Promise<{ success: boolean }> {
+    return apiClient.delete<{ success: boolean }>(
+      `/forum/comments/${commentId}`
     );
   }
 
