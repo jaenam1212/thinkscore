@@ -11,6 +11,7 @@ import { answerService, scoreService, questionService } from "@/lib/services";
 import { Answer } from "@/lib/database.types";
 import ScoreResult from "@/components/ScoreResult";
 import ProfileEditModal from "@/components/auth/ProfileEditModal";
+import CustomerSupportModal from "@/components/CustomerSupportModal";
 
 interface AnswerWithScore extends Answer {
   question_title?: string;
@@ -30,6 +31,7 @@ export default function ProfilePage() {
   );
   const [showScoreModal, setShowScoreModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showSupportModal, setShowSupportModal] = useState(false);
 
   // 로그인하지 않은 경우 홈으로 리다이렉트
   useEffect(() => {
@@ -363,7 +365,10 @@ export default function ProfilePage() {
                     </svg>
                   </div>
                 </button>
-                <button className="w-full text-left p-4 hover:bg-gray-50 transition-colors">
+                <button
+                  onClick={() => setShowSupportModal(true)}
+                  className="w-full text-left p-4 hover:bg-gray-50 transition-colors"
+                >
                   <div className="flex items-center justify-between">
                     <span className="text-gray-800">고객센터</span>
                     <svg
@@ -424,6 +429,12 @@ export default function ProfilePage() {
           }}
         />
       )}
+
+      {/* 고객센터 모달 */}
+      <CustomerSupportModal
+        isOpen={showSupportModal}
+        onClose={() => setShowSupportModal(false)}
+      />
     </div>
   );
 }
