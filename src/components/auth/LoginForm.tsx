@@ -51,6 +51,23 @@ export default function LoginForm({
     alert("카카오 로그인에 실패했습니다. 다시 시도해 주세요.");
   };
 
+  const handleNaverLogin = () => {
+    const clientId = "YLDgJDYDuWExTUVaH7b4";
+    const redirectUri = encodeURIComponent(
+      window.location.hostname === "localhost"
+        ? "http://localhost:3000/auth/naver/callback"
+        : "https://www.thinkscore.kr/auth/naver/callback"
+    );
+    const state = Math.random().toString(36).substring(2, 15);
+
+    // state를 세션에 저장 (CSRF 방지)
+    sessionStorage.setItem("naver_state", state);
+
+    const naverAuthUrl = `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}`;
+
+    window.location.href = naverAuthUrl;
+  };
+
   return (
     <div className="w-full max-w-2xl mx-auto bg-white rounded-2xl shadow-lg p-6 sm:p-8">
       <div className="text-center mb-6">
@@ -148,7 +165,7 @@ export default function LoginForm({
         </button>
 
         <button
-          onClick={() => alert("Naver 로그인 (준비 중)")}
+          onClick={handleNaverLogin}
           disabled={isLoading}
           className="w-full flex items-center justify-center space-x-3 bg-green-500 hover:bg-green-600 disabled:bg-gray-100 text-white py-3 px-4 rounded-lg font-medium transition-colors text-base"
         >

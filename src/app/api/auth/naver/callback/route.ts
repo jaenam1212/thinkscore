@@ -18,9 +18,12 @@ export async function POST(request: NextRequest) {
     }
 
     // 네이버 토큰 교환 API 호출
-    const clientId = process.env.NAVER_CLIENT_ID;
-    const clientSecret = process.env.NAVER_CLIENT_SECRET;
-    const redirectUri = "http://localhost:3000/auth/naver/callback";
+    const clientId = process.env.NAVER_CLIENT_ID || "YLDgJDYDuWExTUVaH7b4";
+    const clientSecret = process.env.NAVER_CLIENT_SECRET || "PExAIfS7FU";
+    const redirectUri =
+      process.env.NODE_ENV === "production"
+        ? "https://www.thinkscore.kr/auth/naver/callback"
+        : "http://localhost:3000/auth/naver/callback";
 
     console.log("토큰 교환 파라미터:", {
       client_id: clientId,

@@ -227,31 +227,42 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     accessToken: string,
     profile: NaverUserProfile
   ) => {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/auth/naver`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+    console.log("loginWithNaver 시작:", {
+      profileId: profile.id,
+      email: profile.email,
+    });
+
+    const apiUrl = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/auth/naver`;
+    console.log("백엔드 API URL:", apiUrl);
+
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        accessToken,
+        profile: {
+          id: profile.id,
+          nickname: profile.nickname,
+          email: profile.email,
+          profile_image: profile.profile_image,
         },
-        body: JSON.stringify({
-          accessToken,
-          profile: {
-            id: profile.id,
-            nickname: profile.nickname,
-            email: profile.email,
-            profile_image: profile.profile_image,
-          },
-        }),
-      }
-    );
+      }),
+    });
+
+    console.log("백엔드 응답 상태:", response.status, response.statusText);
 
     if (!response.ok) {
       const errorData = await response.json();
+      console.error("백엔드 에러:", errorData);
       throw new Error(errorData.message || "네이버 로그인에 실패했습니다.");
     }
 
-    const { user: userData, access_token } = await response.json();
+    const responseData = await response.json();
+    console.log("백엔드 응답 데이터:", responseData);
+
+    const { user: userData, access_token } = responseData;
 
     setUser({
       id: userData.id,

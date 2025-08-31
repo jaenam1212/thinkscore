@@ -4,9 +4,6 @@ import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 
-// 전역 플래그로 중복 처리 방지
-let isProcessingGlobal = false;
-
 function NaverCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -16,19 +13,20 @@ function NaverCallbackContent() {
 
   useEffect(() => {
     const handleNaverCallback = async () => {
-      // 전역 플래그로 중복 처리 방지
-      if (isProcessingGlobal) {
-        console.log("이미 처리 중인 네이버 콜백이 있습니다.");
-        return;
-      }
-
       try {
-        isProcessingGlobal = true;
-
         // URL에서 authorization code 추출
         const code = searchParams.get("code");
         const state = searchParams.get("state");
         const errorParam = searchParams.get("error");
+
+        // state 검증 (CSRF 방지)
+        const savedState = sessionStorage.getItem("naver_state");
+        if (state !== savedState) {
+          setError("보안 검증에 실패했습니다. 다시 시도해주세요.");
+          setLoading(false);
+          return;
+        }
+        sessionStorage.removeItem("naver_state"); // 사용 후 삭제
 
         if (errorParam) {
           setError("네이버 로그인이 취소되었습니다.");
@@ -85,29 +83,23 @@ function NaverCallbackContent() {
         // 로그인 성공 시 코드를 세션에 저장 (중복 처리 방지)
         sessionStorage.setItem("naver_processed_code", code);
 
+        console.log("loginWithNaver 호출 시작");
         await loginWithNaver(data.accessToken, data.profile);
+        console.log("loginWithNaver 성공, 홈으로 이동");
         router.push("/");
       } catch (error) {
         console.error("네이버 콜백 처리 실패:", error);
-        setError("로그인 처리 중 오류가 발생했습니다.");
-        setLoading(false);
-      } finally {
-        isProcessingGlobal = false; // 처리 완료 후 플래그 리셋
+        // 에러가 발생해도 로딩 상태를 유지 (사용자에게 실패를 보여주지 않음)
+        // 대신 조용히 홈으로 리다이렉트
+        setTimeout(() => {
+          router.push("/");
+        }, 2000);
       }
     };
 
     // 즉시 실행 (SDK 로딩 대기 불필요)
     handleNaverCallback();
   }, [searchParams, loginWithNaver, router, isAuthenticated]);
-
-  // 쿠키에서 값 가져오기 (공식 문서 방식)
-  function getCookie(name: string) {
-    const parts = document.cookie.split(name + "=");
-    if (parts.length === 2) {
-      return parts[1].split(";")[0];
-    }
-    return null;
-  }
 
   if (loading) {
     return (
@@ -120,18 +112,13 @@ function NaverCallbackContent() {
     );
   }
 
+  // 에러가 발생해도 로딩 화면을 계속 보여줌 (사용자에게 실패를 노출하지 않음)
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="text-red-500 text-xl mb-4">⚠️</div>
-          <p className="text-gray-800 mb-4">{error}</p>
-          <button
-            onClick={() => router.push("/")}
-            className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
-          >
-            홈으로 돌아가기
-          </button>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">네이버 로그인 처리 중...</p>
         </div>
       </div>
     );
