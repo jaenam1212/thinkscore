@@ -80,7 +80,6 @@ export default function RankingPage() {
     activeTab === "overall" ? overallRankings : questionRankings;
   const myCurrentRank =
     activeTab === "overall" ? myOverallRank : myQuestionRank;
-  const selectedQuestion = questions.find((q) => q.id === selectedProblem);
 
   // 뱃지 생성 함수
   const getBadge = (rank: number) => {
@@ -92,7 +91,7 @@ export default function RankingPage() {
 
   // 사용자명 표시 함수
   const getDisplayName = (ranking: RankingUser | QuestionRankingUser) => {
-    return ranking.display_name || ranking.username || "익명";
+    return ranking.display_name || ranking.username || "비회원";
   };
 
   // 점수 표시 함수

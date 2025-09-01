@@ -242,7 +242,7 @@ export default function ForumPostPage() {
           <div className="flex items-center justify-between text-gray-500 text-sm mb-6 pb-4 border-b border-gray-200">
             <div className="flex items-center space-x-4">
               <span className="font-medium">
-                {post.author?.username || "Unknown"}
+                {post.author?.username || "비회원"}
               </span>
               <span>{new Date(post.created_at).toLocaleDateString()}</span>
             </div>
@@ -329,7 +329,7 @@ export default function ForumPostPage() {
               <div key={comment.id} className="bg-gray-50 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-2">
                   <span className="font-medium text-gray-900">
-                    {comment.author?.username || "Unknown"}
+                    {comment.author?.username || "비회원"}
                   </span>
                   <div className="flex items-center space-x-2">
                     <span className="text-gray-500 text-sm">
