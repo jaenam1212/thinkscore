@@ -49,11 +49,12 @@ export default function AnswerForm({
     try {
       setIsSubmitting(true);
 
-      // 1. 답변 제출 (인증된 사용자 ID 사용)
+      // 1. 답변 제출
       const answerResult = await answerService.createAnswer({
-        user_id: userId,
+        user_id: userId || undefined,
         question_id: questionId,
         content: answer.trim(),
+        is_anonymous: !userId,
       });
 
       setIsEvaluating(true);

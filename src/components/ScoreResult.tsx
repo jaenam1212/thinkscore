@@ -207,7 +207,8 @@ export default function ScoreResult({
                   />
                 </svg>
                 <p className="text-sm font-medium text-slate-700">
-                  평균보다 {score - 72}점 높습니다!
+                  평균보다 {Math.abs(score - 72)}점{" "}
+                  {score >= 72 ? "높습니다!" : "낮습니다."}
                 </p>
               </div>
             </div>

@@ -255,7 +255,7 @@ export default function RankingPage() {
               </div>
             )}
 
-            {/* 내 순위 요약 */}
+            {/* 내 순위 요약 - 로그인한 사용자만 표시 */}
             {isAuthenticated && myCurrentRank && (
               <div className="mt-6 p-4 bg-gradient-to-r from-slate-50 to-gray-50 rounded-xl border border-slate-200">
                 <div className="flex items-center space-x-3">
@@ -284,6 +284,15 @@ export default function RankingPage() {
                     </div>
                   </div>
                 </div>
+              </div>
+            )}
+
+            {/* 비로그인 사용자 안내 */}
+            {!isAuthenticated && (
+              <div className="mt-6 p-4 bg-gray-50 rounded-xl border border-gray-200 text-center">
+                <p className="text-gray-600 text-sm">
+                  로그인하시면 내 순위를 확인할 수 있습니다.
+                </p>
               </div>
             )}
           </div>

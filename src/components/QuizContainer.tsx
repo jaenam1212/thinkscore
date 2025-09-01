@@ -75,12 +75,8 @@ export default function QuizContainer() {
     );
   }
 
-  // 인증되지 않은 사용자에게 로그인 요구
   const handleStartQuiz = () => {
-    if (!isAuthenticated) {
-      setShowAuthModal(true);
-      return;
-    }
+    setShowAuthModal(true);
   };
 
   return (
@@ -134,38 +130,17 @@ export default function QuizContainer() {
 
       {/* 답변 입력 영역 - 하단 고정 */}
       {!showScore && (
-        <>
-          {isAuthenticated ? (
-            <AnswerForm
-              questionId={currentQuestion.id}
-              userId={user?.id || ""}
-              onScoreUpdate={(newScore) => {
-                setScore(newScore);
-                setShowScore(true);
-              }}
-              onEvaluationComplete={(evaluationResult) => {
-                setEvaluation(evaluationResult);
-              }}
-            />
-          ) : (
-            <div className="fixed bottom-16 left-0 right-0 max-w-md mx-auto p-4 bg-stone-50 border-t border-gray-200 z-10">
-              <div className="bg-white border border-gray-200 rounded-2xl p-6 text-center">
-                <h3 className="text-lg font-bold text-gray-800 mb-2">
-                  로그인이 필요합니다
-                </h3>
-                <p className="text-gray-600 mb-4 text-sm">
-                  답변을 작성하고 AI 평가를 받으려면 로그인해주세요.
-                </p>
-                <button
-                  onClick={handleStartQuiz}
-                  className="bg-slate-800 hover:bg-slate-900 text-white px-6 py-2.5 rounded-xl font-medium text-sm transition-colors"
-                >
-                  로그인하기
-                </button>
-              </div>
-            </div>
-          )}
-        </>
+        <AnswerForm
+          questionId={currentQuestion.id}
+          userId={user?.id || ""}
+          onScoreUpdate={(newScore) => {
+            setScore(newScore);
+            setShowScore(true);
+          }}
+          onEvaluationComplete={(evaluationResult) => {
+            setEvaluation(evaluationResult);
+          }}
+        />
       )}
     </>
   );

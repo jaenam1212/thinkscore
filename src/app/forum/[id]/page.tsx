@@ -296,24 +296,32 @@ export default function ForumPostPage() {
           </h2>
 
           {/* 댓글 작성 폼 */}
-          <form onSubmit={handleCommentSubmit} className="mb-6">
-            <textarea
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              placeholder="댓글을 작성해주세요..."
-              className="w-full p-3 rounded-lg bg-gray-50 text-gray-700 placeholder-gray-400 border border-gray-200 focus:border-blue-400 focus:outline-none resize-none"
-              rows={3}
-            />
-            <div className="flex justify-end mt-3">
-              <button
-                type="submit"
-                disabled={!newComment.trim()}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-              >
-                댓글 작성
-              </button>
+          {isAuthenticated ? (
+            <form onSubmit={handleCommentSubmit} className="mb-6">
+              <textarea
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder="댓글을 작성해주세요..."
+                className="w-full p-3 rounded-lg bg-gray-50 text-gray-700 placeholder-gray-400 border border-gray-200 focus:border-blue-400 focus:outline-none resize-none"
+                rows={3}
+              />
+              <div className="flex justify-end mt-3">
+                <button
+                  type="submit"
+                  disabled={!newComment.trim()}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                >
+                  댓글 작성
+                </button>
+              </div>
+            </form>
+          ) : (
+            <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200 text-center">
+              <p className="text-gray-600 text-sm">
+                댓글을 작성하려면 로그인이 필요합니다.
+              </p>
             </div>
-          </form>
+          )}
 
           {/* 댓글 목록 */}
           <div className="space-y-4">
