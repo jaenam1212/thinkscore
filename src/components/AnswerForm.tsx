@@ -51,7 +51,7 @@ export default function AnswerForm({
 
       // 1. 답변 제출
       const answerResult = await answerService.createAnswer({
-        user_id: userId || undefined,
+        ...(userId && { user_id: userId }),
         question_id: questionId,
         content: answer.trim(),
         is_anonymous: !userId,
