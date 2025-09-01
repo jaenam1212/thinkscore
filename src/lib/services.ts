@@ -28,9 +28,10 @@ interface UpdateQuestionData {
 }
 
 interface CreateAnswerData {
-  user_id: string;
+  user_id?: string;
   question_id: number;
   content: string;
+  is_anonymous?: boolean;
 }
 
 interface CreateScoreData {
