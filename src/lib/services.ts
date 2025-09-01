@@ -72,6 +72,27 @@ export const questionService = {
 
   getRandomQuestion: (): Promise<Question> =>
     apiClient.get<Question>("/questions/random"),
+
+  getQuestionsList: (): Promise<
+    Array<{
+      id: number;
+      title: string;
+      description: string;
+      category: string;
+      difficulty: string;
+      tags: string[];
+    }>
+  > =>
+    apiClient.get<
+      Array<{
+        id: number;
+        title: string;
+        description: string;
+        category: string;
+        difficulty: string;
+        tags: string[];
+      }>
+    >("/questions/list"),
 };
 
 export const answerService = {
