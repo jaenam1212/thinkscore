@@ -31,9 +31,21 @@ export default function AnswerForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [showResult, setShowResult] = useState(false);
+  const [startTime, setStartTime] = useState<number | null>(null);
+  const [lastKeyTime, setLastKeyTime] = useState<number | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     if (e.target.value.length <= 1000) {
+      const currentTime = Date.now();
+
+      // 입력 시작 시간 기록
+      if (!startTime && e.target.value.length === 1) {
+        setStartTime(currentTime);
+      }
+
+      // 마지막 키 입력 시간 업데이트
+      setLastKeyTime(currentTime);
+
       setAnswer(e.target.value);
 
       // 자동 높이 조절
@@ -43,8 +55,28 @@ export default function AnswerForm({
     }
   };
 
+  const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const pasteText = e.clipboardData.getData("text");
+    if (pasteText.length > 20) {
+      e.preventDefault();
+      alert("AI 치팅은 허용되지 않습니다.");
+    }
+  };
+
   const handleSubmit = async () => {
     if (!answer.trim() || isSubmitting) return;
+
+    // 입력 속도 검증
+    if (startTime && lastKeyTime) {
+      const totalTime = lastKeyTime - startTime;
+      const typingSpeed = answer.length / (totalTime / 1000); // 초당 글자수
+
+      // 초당 10글자 이상이면 의심
+      if (typingSpeed > 10) {
+        alert("AI 치팅은 허용되지 않습니다.");
+        return;
+      }
+    }
 
     try {
       setIsSubmitting(true);
@@ -154,6 +186,7 @@ export default function AnswerForm({
         <textarea
           value={answer}
           onChange={handleInputChange}
+          onPaste={handlePaste}
           placeholder="당신의 생각과 근거를 자유롭게 작성해보세요..."
           className="w-full min-h-[48px] p-4 border-0 rounded-2xl resize-none focus:outline-none text-sm overflow-y-auto"
           rows={1}
