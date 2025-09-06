@@ -59,7 +59,7 @@ export default function AppleLoginButton({
           window.AppleID.auth.init({
             clientId: process.env.NEXT_PUBLIC_APPLE_CLIENT_ID,
             scope: "name email",
-            redirectURI: window.location.origin,
+            redirectURI: "https://www.thinkscore.kr/auth/apple/callback",
             usePopup: true,
           });
           console.log("Apple ID SDK 초기화 완료");
@@ -116,7 +116,7 @@ export default function AppleLoginButton({
             window.AppleID.auth.init({
               clientId: process.env.NEXT_PUBLIC_APPLE_CLIENT_ID,
               scope: "name email",
-              redirectURI: window.location.origin,
+              redirectURI: "https://www.thinkscore.kr/auth/apple/callback",
               usePopup: true,
             });
             // 초기화 후 다시 시도
