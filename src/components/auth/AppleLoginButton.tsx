@@ -51,13 +51,35 @@ export default function AppleLoginButton({
 
   // Apple SDK 초기화
   React.useEffect(() => {
-    if (window.AppleID && process.env.NEXT_PUBLIC_APPLE_CLIENT_ID) {
-      window.AppleID.auth.init({
-        clientId: process.env.NEXT_PUBLIC_APPLE_CLIENT_ID,
-        scope: "name email",
-        redirectURI: window.location.origin,
-        usePopup: true,
-      });
+    const initAppleID = () => {
+      if (window.AppleID && process.env.NEXT_PUBLIC_APPLE_CLIENT_ID) {
+        try {
+          window.AppleID.auth.init({
+            clientId: process.env.NEXT_PUBLIC_APPLE_CLIENT_ID,
+            scope: "name email",
+            redirectURI: window.location.origin,
+            usePopup: true,
+          });
+          console.log("Apple ID SDK 초기화 완료");
+        } catch (error) {
+          console.error("Apple ID SDK 초기화 실패:", error);
+        }
+      }
+    };
+
+    // SDK가 로드될 때까지 기다림
+    if (window.AppleID) {
+      initAppleID();
+    } else {
+      const checkAppleID = setInterval(() => {
+        if (window.AppleID) {
+          clearInterval(checkAppleID);
+          initAppleID();
+        }
+      }, 100);
+
+      // 10초 후 정리
+      setTimeout(() => clearInterval(checkAppleID), 10000);
     }
   }, []);
 
@@ -71,8 +93,34 @@ export default function AppleLoginButton({
         throw new Error("Apple Sign In SDK not loaded");
       }
 
-      const response = await window.AppleID.auth.signIn();
+      // 초기화 상태 확인 및 재시도
+      if (!window.AppleID.auth) {
+        throw new Error("Apple ID auth not initialized");
+      }
 
+      // 초기화가 안되어 있다면 다시 시도
+      let response;
+      try {
+        response = await window.AppleID.auth.signIn();
+      } catch (initError: unknown) {
+        if (initError instanceof Error && initError.message?.includes("init")) {
+          console.log("Apple ID 재초기화 시도");
+          if (process.env.NEXT_PUBLIC_APPLE_CLIENT_ID) {
+            window.AppleID.auth.init({
+              clientId: process.env.NEXT_PUBLIC_APPLE_CLIENT_ID,
+              scope: "name email",
+              redirectURI: window.location.origin,
+              usePopup: true,
+            });
+            // 초기화 후 다시 시도
+            response = await window.AppleID.auth.signIn();
+          } else {
+            throw new Error("Apple Client ID not configured");
+          }
+        } else {
+          throw initError;
+        }
+      }
       await loginWithApple(response.authorization.id_token, response.user);
 
       if (onSuccess) {
