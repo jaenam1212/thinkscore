@@ -11,6 +11,7 @@ import TermsModal from "./TermsModal";
 interface LoginFormProps {
   onLogin: (email: string, password: string) => Promise<void>;
   onSwitchToRegister: () => void;
+  onClose?: () => void; // 모달을 닫기 위한 콜백 추가
   isLoading?: boolean;
   error?: string;
 }
@@ -18,6 +19,7 @@ interface LoginFormProps {
 export default function LoginForm({
   onLogin,
   onSwitchToRegister,
+  onClose,
   isLoading = false,
   error,
 }: LoginFormProps) {
@@ -71,6 +73,10 @@ export default function LoginForm({
 
   const handleAppleSuccess = () => {
     console.log("Apple 로그인 성공!");
+    // Apple 로그인 성공 시 모달 닫기
+    if (onClose) {
+      onClose();
+    }
   };
 
   const handleAppleError = (error: Error) => {
