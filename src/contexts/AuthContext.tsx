@@ -28,6 +28,7 @@ interface AuthContextType {
     accessToken: string,
     profile: NaverUserProfile
   ) => Promise<void>;
+  loginWithApple: (idToken: string, user?: AppleUserData) => Promise<void>;
   register: (
     email: string,
     password: string,
@@ -53,6 +54,14 @@ interface NaverUserProfile {
   nickname: string;
   email: string;
   profile_image: string;
+}
+
+interface AppleUserData {
+  email?: string;
+  name?: {
+    firstName?: string;
+    lastName?: string;
+  };
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -273,6 +282,38 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     localStorage.setItem("auth_token", access_token);
   };
 
+  const loginWithApple = async (idToken: string, user?: AppleUserData) => {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/auth/apple`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          idToken,
+          user,
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Apple 로그인에 실패했습니다.");
+    }
+
+    const responseData = await response.json();
+    const { user: userData, access_token } = responseData;
+
+    setUser({
+      id: userData.id,
+      email: userData.email,
+      displayName: userData.displayName,
+    });
+    setToken(access_token);
+    localStorage.setItem("auth_token", access_token);
+  };
+
   const logout = () => {
     setUser(null);
     setToken(null);
@@ -326,6 +367,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     login,
     loginWithKakao,
     loginWithNaver,
+    loginWithApple,
     register,
     logout,
     updateUserInfo,

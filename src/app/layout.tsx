@@ -130,6 +130,10 @@ export default function RootLayout({
           crossOrigin="anonymous"
           strategy="afterInteractive"
         />
+        <Script
+          src="https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js"
+          strategy="afterInteractive"
+        />
         <StructuredData type="website" />
         <AuthProvider>{children}</AuthProvider>
       </body>
