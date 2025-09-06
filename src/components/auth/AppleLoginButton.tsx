@@ -51,6 +51,8 @@ export default function AppleLoginButton({
 
   // Apple SDK 초기화
   React.useEffect(() => {
+    console.log("Apple Client ID:", process.env.NEXT_PUBLIC_APPLE_CLIENT_ID);
+
     const initAppleID = () => {
       if (window.AppleID && process.env.NEXT_PUBLIC_APPLE_CLIENT_ID) {
         try {
@@ -64,6 +66,11 @@ export default function AppleLoginButton({
         } catch (error) {
           console.error("Apple ID SDK 초기화 실패:", error);
         }
+      } else {
+        console.error("Apple ID 초기화 실패: SDK 또는 Client ID 없음", {
+          appleID: !!window.AppleID,
+          clientId: process.env.NEXT_PUBLIC_APPLE_CLIENT_ID,
+        });
       }
     };
 
