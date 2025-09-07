@@ -14,6 +14,7 @@ interface AnswerFormProps {
     feedback: string;
     criteriaScores: Record<string, number>;
   }) => void;
+  onAnswerSubmit?: (answer: string) => void;
 }
 
 export default function AnswerForm({
@@ -21,6 +22,7 @@ export default function AnswerForm({
   userId,
   onScoreUpdate,
   onEvaluationComplete,
+  onAnswerSubmit,
 }: AnswerFormProps) {
   const [answer, setAnswer] = useState("");
   const [evaluation, setEvaluation] = useState<{
@@ -80,6 +82,11 @@ export default function AnswerForm({
 
     try {
       setIsSubmitting(true);
+
+      // 답변 콜백 호출
+      if (onAnswerSubmit) {
+        onAnswerSubmit(answer.trim());
+      }
 
       // 1. 답변 제출
       const answerResult = await answerService.createAnswer({

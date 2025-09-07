@@ -8,6 +8,12 @@ interface ScoreResultProps {
   criteriaScores?: Record<string, number>;
   onRetry?: () => void;
   onClose?: () => void;
+  question?: {
+    title: string;
+    content: string;
+    description?: string;
+  };
+  userAnswer?: string;
 }
 
 export default function ScoreResult({
@@ -16,6 +22,8 @@ export default function ScoreResult({
   criteriaScores,
   onRetry,
   onClose,
+  question,
+  userAnswer,
 }: ScoreResultProps) {
   // 피드백을 강점과 개선점으로 분리
   const parseStrength = (text: string) => {
@@ -75,7 +83,7 @@ export default function ScoreResult({
 
   return (
     <div
-      className="fixed inset-0 flex items-start pt-45 center justify-center z-50 pointer-events-none"
+      className="fixed inset-0 bg-black bg-opacity-50 z-50 overflow-y-auto"
       onClick={handleBackgroundClick}
     >
       <style jsx>{`
@@ -95,37 +103,60 @@ export default function ScoreResult({
         }
       `}</style>
 
-      <div className="flex flex-col items-center space-y-6">
-        <div
-          className="w-32 h-32 bg-white rounded-full flex items-center justify-center shadow-lg border-4 border-slate-200"
-          style={{
-            animation: "slideUpBounce 0.6s ease-out forwards",
-          }}
-        >
-          <div className="text-slate-800 text-center">
-            <CountUp
-              from={0}
-              to={score}
-              direction="up"
-              duration={0.3}
-              className="text-3xl font-bold"
-            />
-            <div className="text-sm font-medium text-slate-600">점</div>
+      <div className="min-h-screen flex flex-col bg-gray-50 p-4">
+        {/* 문제 요약 섹션 */}
+        {question && (
+          <div className="bg-white rounded-lg p-4 mb-4 shadow-sm">
+            <h2 className="text-sm font-bold text-gray-800 mb-2">문제</h2>
+            <h3 className="text-base font-semibold text-gray-900 mb-2">
+              {question.title}
+            </h3>
+            {question.description && (
+              <p className="text-xs text-gray-600 mb-2">
+                {question.description}
+              </p>
+            )}
+            <p className="text-xs text-gray-700 leading-relaxed whitespace-pre-line">
+              {question.content.length > 200
+                ? `${question.content.substring(0, 200)}...`
+                : question.content}
+            </p>
+          </div>
+        )}
+
+        {/* 점수 원 */}
+        <div className="flex justify-center mb-4">
+          <div
+            className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg border-4 border-slate-200"
+            style={{
+              animation: "slideUpBounce 0.6s ease-out forwards",
+            }}
+          >
+            <div className="text-slate-800 text-center">
+              <CountUp
+                from={0}
+                to={score}
+                direction="up"
+                duration={0.3}
+                className="text-2xl font-bold"
+              />
+              <div className="text-xs font-medium text-slate-600">점</div>
+            </div>
           </div>
         </div>
 
         {/* 점수 평가 영역 */}
-        <div className="bg-white rounded-2xl p-6 shadow-lg border border-slate-200 max-w-sm">
-          <h3 className="text-lg font-bold text-slate-800 mb-3">점수 평가</h3>
-          <div className="space-y-3 mb-3">
+        <div className="bg-white rounded-2xl p-4 shadow-lg border border-slate-200 mx-auto w-full max-w-sm">
+          <h3 className="text-base font-bold text-slate-800 mb-2">점수 평가</h3>
+          <div className="space-y-2 mb-2">
             {Object.entries(displayCriteria).map(
               ([criteriaName, criteriaScore]) => (
                 <div
                   key={criteriaName}
                   className="flex items-center justify-between"
                 >
-                  <span className="text-sm text-slate-600">{criteriaName}</span>
-                  <span className="text-sm font-medium text-slate-800">
+                  <span className="text-xs text-slate-600">{criteriaName}</span>
+                  <span className="text-xs font-medium text-slate-800">
                     {criteriaScore}점
                   </span>
                 </div>
@@ -134,23 +165,19 @@ export default function ScoreResult({
           </div>
 
           {/* 점수를 받은 이유 */}
-          <div className="mb-4 p-3 bg-slate-50 rounded-lg">
+          <div className="mb-3 p-2 bg-slate-50 rounded-lg">
             <div className="space-y-2">
               {feedback ? (
                 <>
                   {strength && (
-                    <div className="text-sm text-slate-700">
-                      <span className="font-medium text-green-700">
-                        👍 강점:
-                      </span>{" "}
+                    <div className="text-xs text-slate-700">
+                      <span className="font-medium text-green-700">👍</span>{" "}
                       {strength}
                     </div>
                   )}
                   {improvement && (
-                    <div className="text-sm text-slate-700">
-                      <span className="font-medium text-blue-700">
-                        💡 개선점:
-                      </span>{" "}
+                    <div className="text-xs text-slate-700">
+                      <span className="font-medium text-blue-700">💡</span>{" "}
                       {improvement}
                     </div>
                   )}
@@ -173,51 +200,46 @@ export default function ScoreResult({
           </div>
 
           {/* 다른 사용자들과의 비교 */}
-          <div className="border-t border-slate-200 pt-4">
-            <h4 className="text-sm font-bold text-slate-800 mb-3">
-              다른 사용자들과 비교
-            </h4>
-            <div className="space-y-2 mb-2">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-slate-600">평균 점수</span>
-                <span className="text-sm font-medium text-slate-800">72점</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-slate-600">상위 10%</span>
-                <span className="text-sm font-medium text-slate-800">89점</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-slate-600">내 점수</span>
-                <span className="text-sm font-bold text-slate-600">
-                  {score}점
-                </span>
-              </div>
+          <div className="border-t border-slate-200 pt-2">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs text-slate-600">평균 72점</span>
+              <span className="text-xs font-bold text-slate-800">
+                내 점수 {score}점
+              </span>
             </div>
-            <div className="bg-slate-50 rounded-lg p-2 border border-slate-200">
-              <div className="flex items-center space-x-2">
-                <svg
-                  className="w-4 h-3 text-slate-600"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                <p className="text-sm font-medium text-slate-700">
-                  평균보다 {Math.abs(score - 72)}점{" "}
-                  {score >= 72 ? "높습니다!" : "낮습니다."}
-                </p>
-              </div>
+            <div className="bg-slate-50 rounded-lg p-2 text-center">
+              <p className="text-xs font-medium text-slate-700">
+                평균보다 {Math.abs(score - 72)}점{" "}
+                {score >= 72 ? "높음" : "낮음"}
+              </p>
             </div>
 
-            {/* 닫기 버튼 */}
-            <div className="mt-2 pointer-events-auto">
+            {/* 액션 버튼들 */}
+            <div className="mt-3 space-y-2 pointer-events-auto">
+              {onRetry && (
+                <button
+                  onClick={onRetry}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 px-4 rounded-lg font-medium text-sm transition-colors flex items-center justify-center space-x-2"
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                    />
+                  </svg>
+                  <span>다시하기</span>
+                </button>
+              )}
               <button
-                onClick={onClose || onRetry}
-                className="w-full bg-slate-800 hover:bg-slate-900 text-white py-2.5 px-4 rounded-xl font-medium text-sm transition-colors flex items-center justify-center space-x-2"
+                onClick={onClose}
+                className="w-full bg-gray-600 hover:bg-gray-700 text-white py-2.5 px-4 rounded-lg font-medium text-sm transition-colors flex items-center justify-center space-x-2"
               >
                 <svg
                   className="w-4 h-4"

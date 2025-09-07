@@ -36,6 +36,7 @@ export default function QuizContainer() {
   const [selectedQuestionId, setSelectedQuestionId] = useState<number | null>(
     null
   );
+  const [userAnswer, setUserAnswer] = useState<string>("");
 
   useEffect(() => {
     // 백엔드에서 오늘의 문제 로드
@@ -118,6 +119,7 @@ export default function QuizContainer() {
     setScore(null);
     setShowScore(false);
     setEvaluation(null);
+    setUserAnswer("");
   };
 
   const formatDate = (date: Date) => {
@@ -153,6 +155,13 @@ export default function QuizContainer() {
           feedback={evaluation?.feedback}
           criteriaScores={evaluation?.criteriaScores}
           onRetry={handleRetry}
+          onClose={handleRetry}
+          question={{
+            title: currentQuestion?.title || "",
+            content: currentQuestion?.content || "",
+            description: currentQuestion?.description || "",
+          }}
+          userAnswer={userAnswer}
         />
       )}
 
@@ -280,6 +289,9 @@ export default function QuizContainer() {
           }}
           onEvaluationComplete={(evaluationResult) => {
             setEvaluation(evaluationResult);
+          }}
+          onAnswerSubmit={(answer) => {
+            setUserAnswer(answer);
           }}
         />
       )}
