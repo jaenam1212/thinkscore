@@ -91,7 +91,7 @@ export default function RankingPage() {
 
   // 사용자명 표시 함수
   const getDisplayName = (ranking: RankingUser | QuestionRankingUser) => {
-    return ranking.display_name || ranking.username || "비회원";
+    return ranking.display_name || "비회원";
   };
 
   // 점수 표시 함수
