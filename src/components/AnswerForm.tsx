@@ -117,7 +117,7 @@ export default function AnswerForm({
   // 평가 완료 후 기존 ScoreResult로 전환 (모달 비활성화)
 
   return (
-    <div className="fixed bottom-16 left-0 right-0 max-w-sm sm:max-w-md lg:max-w-2xl xl:max-w-4xl mx-auto p-4 bg-stone-50 border-t border-gray-200 z-10">
+    <div className="fixed bottom-16 left-0 right-0   sm:max-w-md lg:max-w-2xl xl:max-w-4xl mx-auto p-4 bg-stone-50 border-t border-gray-200 z-10">
       {/* 평가 중일 때 전체 화면 로딩 모달 */}
       {isEvaluating && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">

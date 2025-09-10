@@ -146,7 +146,7 @@ export default function ScoreResult({
         </div>
 
         {/* 점수 평가 영역 */}
-        <div className="bg-white rounded-2xl p-4 shadow-lg border border-slate-200 mx-auto w-full max-w-sm">
+        <div className="bg-white rounded-2xl p-4 shadow-lg border border-slate-200 mx-auto w-full  ">
           <h3 className="text-base font-bold text-slate-800 mb-2">점수 평가</h3>
           <div className="space-y-2 mb-2">
             {Object.entries(displayCriteria).map(
