@@ -203,7 +203,7 @@ export default function ProfilePage() {
       <LeftSidebar />
 
       {/* 메인 모바일 뷰 */}
-      <div className="min-h-screen bg-stone-50 flex flex-col w-full max-w-md mx-auto md:border-x md:border-gray-200 relative lg:flex-shrink-0">
+      <div className="min-h-screen bg-stone-50 flex flex-col w-full max-w-sm sm:max-w-md lg:max-w-2xl xl:max-w-4xl mx-auto md:border-x md:border-gray-200 relative lg:flex-shrink-0">
         <AppHeader title="프로필" subtitle="내 정보 및 활동" />
 
         {/* 메인 컨텐츠 */}
