@@ -19,7 +19,7 @@ type QuestionListItem = {
 };
 
 export default function QuizContainer() {
-  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const [score, setScore] = useState<number | null>(null);
   const [showScore, setShowScore] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
@@ -31,7 +31,9 @@ export default function QuizContainer() {
     criteriaScores: Record<string, number>;
   } | null>(null);
   const [isSelectMode, setIsSelectMode] = useState(false);
-  const [activeTab, setActiveTab] = useState<"today" | "select">("today");
+  const [activeTab, setActiveTab] = useState<"today" | "select" | "essay">(
+    "today"
+  );
   const [questionsList, setQuestionsList] = useState<QuestionListItem[]>([]);
   const [selectedQuestionId, setSelectedQuestionId] = useState<number | null>(
     null
@@ -135,10 +137,6 @@ export default function QuizContainer() {
     );
   }
 
-  const handleStartQuiz = () => {
-    setShowAuthModal(true);
-  };
-
   return (
     <>
       {/* 인증 모달 */}
@@ -181,7 +179,7 @@ export default function QuizContainer() {
                     window.location.reload(); // 간단하게 새로고침으로 오늘의 문제 로드
                   }
                 }}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`flex-1 px-3 py-2 rounded-md text-xs font-medium transition-colors ${
                   activeTab === "today"
                     ? "bg-white text-gray-900 shadow-sm"
                     : "text-gray-600 hover:text-gray-900"
@@ -191,7 +189,7 @@ export default function QuizContainer() {
               </button>
               <button
                 onClick={handleToggleSelectMode}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`flex-1 px-3 py-2 rounded-md text-xs font-medium transition-colors ${
                   activeTab === "select"
                     ? "bg-white text-gray-900 shadow-sm"
                     : "text-gray-600 hover:text-gray-900"
@@ -199,6 +197,24 @@ export default function QuizContainer() {
               >
                 문제 선택
               </button>
+              {/* TODO: 입시 논술 기능 추가 예정 */}
+              {/*
+              <button
+                onClick={() => {
+                  setIsSelectMode(false);
+                  setActiveTab("essay");
+                  // 실제 논술 문제로 전환
+                  alert("실제 논술 문제 기능은 준비 중입니다!");
+                }}
+                className={`flex-1 px-3 py-2 rounded-md text-xs font-medium transition-colors ${
+                  activeTab === "essay"
+                    ? "bg-white text-gray-900 shadow-sm"
+                    : "text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                입시 논술
+              </button>
+              */}
             </div>
           </div>
 
@@ -268,7 +284,7 @@ export default function QuizContainer() {
                   <div className="text-xs text-gray-500 mb-2 text-center">
                     {currentQuestion.description}
                   </div>
-                  <p className="text-gray-700 leading-relaxed text-sm whitespace-pre-line">
+                  <p className="text-gray-700 leading-relaxed text-sm whitespace-pre-line text-center">
                     {currentQuestion.content}
                   </p>
                 </div>

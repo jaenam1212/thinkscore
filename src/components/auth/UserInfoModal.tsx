@@ -73,11 +73,14 @@ export default function UserInfoModal({
 
         <div className="mb-4 text-center">
           {kakaoProfile.profileImage && (
-            <img
-              src={kakaoProfile.profileImage}
-              alt="프로필 이미지"
-              className="w-16 h-16 rounded-full mx-auto mb-2"
-            />
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={kakaoProfile.profileImage}
+                alt="프로필 이미지"
+                className="w-16 h-16 rounded-full mx-auto mb-2"
+              />
+            </>
           )}
           <p className="text-sm text-gray-600">
             카카오 로그인이 완료되었습니다!

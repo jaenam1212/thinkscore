@@ -21,7 +21,7 @@ export default function PageLayout({
       <LeftSidebar />
 
       {/* 메인 모바일 뷰 - 통일된 레이아웃 */}
-      <div className="min-h-screen bg-stone-50 flex flex-col w-full max-w-md mx-auto md:border-x md:border-gray-200 relative lg:flex-shrink-0">
+      <div className="min-h-screen bg-stone-50 flex flex-col w-full max-w-sm sm:max-w-md lg:max-w-2xl xl:max-w-4xl mx-auto md:border-x md:border-gray-200 relative lg:flex-shrink-0">
         {title && subtitle && <AppHeader title={title} subtitle={subtitle} />}
 
         {/* 메인 컨텐츠 */}

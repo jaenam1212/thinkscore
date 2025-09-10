@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">ThinkScore</string>
+    <string name="title_activity_main">ThinkScore</string>
+    <string name="package_name">app.thinkscore.com</string>
+    <string name="custom_url_scheme">app.thinkscore.com</string>
+</resources>

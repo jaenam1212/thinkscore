@@ -1,9 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import AnimatedContent from "./ui/AnimatedContent";
-import { answerService, profileService } from "@/lib/services";
-import EvaluationResult from "./EvaluationResult";
+import { answerService } from "@/lib/services";
 
 interface AnswerFormProps {
   questionId: number;
@@ -25,14 +23,8 @@ export default function AnswerForm({
   onAnswerSubmit,
 }: AnswerFormProps) {
   const [answer, setAnswer] = useState("");
-  const [evaluation, setEvaluation] = useState<{
-    score: number;
-    feedback: string;
-    criteriaScores: Record<string, number>;
-  } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isEvaluating, setIsEvaluating] = useState(false);
-  const [showResult, setShowResult] = useState(false);
   const [startTime, setStartTime] = useState<number | null>(null);
   const [lastKeyTime, setLastKeyTime] = useState<number | null>(null);
 
@@ -106,9 +98,6 @@ export default function AnswerForm({
       console.log("=== Frontend Evaluation Result ===");
       console.log("evaluationResult:", evaluationResult);
 
-      setEvaluation(evaluationResult);
-      setShowResult(true);
-
       // 부모 컴포넌트에 점수와 평가 결과 전달
       if (onScoreUpdate) {
         onScoreUpdate(evaluationResult.score);
@@ -128,7 +117,7 @@ export default function AnswerForm({
   // 평가 완료 후 기존 ScoreResult로 전환 (모달 비활성화)
 
   return (
-    <div className="fixed bottom-16 left-0 right-0 max-w-md mx-auto p-4 bg-stone-50 border-t border-gray-200 z-10">
+    <div className="fixed bottom-16 left-0 right-0 max-w-sm sm:max-w-md lg:max-w-2xl xl:max-w-4xl mx-auto p-4 bg-stone-50 border-t border-gray-200 z-10">
       {/* 평가 중일 때 전체 화면 로딩 모달 */}
       {isEvaluating && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">

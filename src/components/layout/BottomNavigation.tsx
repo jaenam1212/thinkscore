@@ -6,7 +6,7 @@ import Link from "next/link";
 export default function BottomNavigation() {
   const pathname = usePathname();
   return (
-    <nav className="fixed bottom-0 left-0 right-0 w-full max-w-md mx-auto border-t border-gray-200 bg-stone-50 z-20">
+    <nav className="fixed bottom-0 left-0 right-0 w-full max-w-sm sm:max-w-md lg:max-w-2xl xl:max-w-4xl mx-auto border-t border-gray-200 bg-stone-50 z-20">
       <div className="grid grid-cols-4">
         <Link
           href="/ranking"
