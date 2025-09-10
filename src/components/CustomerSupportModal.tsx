@@ -95,6 +95,44 @@ export default function CustomerSupportModal({
               <li>• 사용 중인 기기/브라우저</li>
             </ul>
           </div>
+
+          <div className="bg-gray-50 rounded-lg p-4">
+            <h3 className="font-medium text-gray-800 mb-2">사업자 정보</h3>
+            <div className="text-sm text-gray-600 space-y-1">
+              <p>
+                <span className="font-semibold">상호:</span> 파도
+              </p>
+              <p>
+                <span className="font-semibold">대표자:</span> 이재남
+              </p>
+              <p>
+                <span className="font-semibold">사업자 등록번호:</span>{" "}
+                898-62-00763
+              </p>
+              <p>
+                <span className="font-semibold">주소:</span> 서울 양천구 목동
+                520-5
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-blue-50 rounded-lg p-4">
+            <h3 className="font-medium text-blue-800 mb-2">약관 및 정책</h3>
+            <div className="flex flex-col space-y-2">
+              <button
+                onClick={() => window.open("/terms", "_blank")}
+                className="text-left text-sm text-blue-600"
+              >
+                <span className="font-semibold">이용약관</span>
+              </button>
+              <button
+                onClick={() => window.open("/privacy", "_blank")}
+                className="text-left text-sm text-blue-600"
+              >
+                <span className="font-semibold">개인정보 처리방침</span>
+              </button>
+            </div>
+          </div>
         </div>
 
         <div className="mt-6 flex justify-end">

@@ -88,7 +88,7 @@ export default function PrivacyModal({ isOpen, onClose }: PrivacyModalProps) {
                   <ul className="list-disc pl-6 text-gray-600">
                     <li>이메일 주소</li>
                     <li>닉네임</li>
-                    <li>소셜 로그인 ID (카카오, 네이버)</li>
+                    <li>소셜 로그인 ID</li>
                   </ul>
                 </div>
                 <div>
@@ -186,7 +186,7 @@ export default function PrivacyModal({ isOpen, onClose }: PrivacyModalProps) {
                     <strong>개인정보보호책임자:</strong> ThinkScore 운영팀
                   </p>
                   <p>
-                    <strong>연락처:</strong> contact@thinkscore.com
+                    <strong>연락처:</strong> jaenam1212@gmail.com
                   </p>
                 </div>
               </div>
@@ -202,7 +202,7 @@ export default function PrivacyModal({ isOpen, onClose }: PrivacyModalProps) {
                 7일 전부터 공지사항을 통하여 고지할 것입니다.
               </p>
               <div className="mt-4 text-sm text-gray-500">
-                <p>시행일자: 2024년 1월 1일</p>
+                <p>시행일자: 2025년 8월 1일</p>
               </div>
             </section>
           </div>

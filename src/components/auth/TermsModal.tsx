@@ -222,7 +222,7 @@ export default function TermsModal({ isOpen, onClose }: TermsModalProps) {
             <section className="border-t pt-6">
               <h3 className="text-lg font-semibold text-gray-800 mb-3">부칙</h3>
               <p className="text-gray-600">
-                본 약관은 2024년 1월 1일부터 적용됩니다.
+                본 약관은 2025년 8월 1일부터 적용됩니다.
               </p>
             </section>
           </div>

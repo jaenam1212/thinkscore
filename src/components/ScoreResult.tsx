@@ -23,7 +23,6 @@ export default function ScoreResult({
   onRetry,
   onClose,
   question,
-  userAnswer,
 }: ScoreResultProps) {
   // 피드백을 강점과 개선점으로 분리
   const parseStrength = (text: string) => {
