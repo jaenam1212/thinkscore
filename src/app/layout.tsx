@@ -4,6 +4,7 @@ import Script from "next/script";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import StructuredData from "@/components/StructuredData";
+import { Analytics } from "@vercel/analytics/react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -136,6 +137,7 @@ export default function RootLayout({
         />
         <StructuredData type="website" />
         <AuthProvider>{children}</AuthProvider>
+        <Analytics />
       </body>
     </html>
   );
