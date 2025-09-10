@@ -41,3 +41,21 @@ yarn-error.log*
 next-env.d.ts
 
 .vercel
+
+# Android Keystore Files (NEVER commit these!)
+*.jks
+*.keystore
+keystore.properties
+upload-keystore.jks
+
+# iOS Build Files
+ios/App/build/
+ios/App/DerivedData/
+
+# Android Build Files
+android/app/build/
+android/build/
+
+# Capacitor
+android/
+ios/
