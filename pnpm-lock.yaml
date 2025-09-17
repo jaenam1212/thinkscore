@@ -20,12 +20,18 @@ importers:
       '@capacitor/ios':
         specifier: ^7.4.3
         version: 7.4.3(@capacitor/core@7.4.3)
+      '@capacitor/status-bar':
+        specifier: ^7.0.3
+        version: 7.0.3(@capacitor/core@7.4.3)
       '@types/kakao-js-sdk':
         specifier: ^1.39.5
         version: 1.39.5
       '@vercel/analytics':
         specifier: ^1.5.0
         version: 1.5.0(next@15.5.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)
+      '@vercel/speed-insights':
+        specifier: ^1.2.0
+        version: 1.2.0(next@15.5.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)
       cross-env:
         specifier: ^10.0.0
         version: 10.0.0
@@ -135,6 +141,11 @@ packages:
     resolution: {integrity: sha512-VNm7cHODgh3KK/4ZC2rXU9gBlvHii/mYFLI+XMXwq24nhB679QxHhz+pUuI7PatYoM2q4MAL0NR/dRgehKCaSA==}
     peerDependencies:
       '@capacitor/core': ^7.4.0
+
+  '@capacitor/status-bar@7.0.3':
+    resolution: {integrity: sha512-JyRpVnKwHij9hgPWolF6PK+HT3e2HSPjN11/h2OmKxq8GAdPGARFLv+97eZl0pvuvm0Kka/LpiLb5whXISBg7Q==}
+    peerDependencies:
+      '@capacitor/core': '>=7.0.0'
 
   '@cspotcode/source-map-support@0.8.1':
     resolution: {integrity: sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw==}
@@ -829,6 +840,29 @@ packages:
     peerDependenciesMeta:
       '@remix-run/react':
         optional: true
+      '@sveltejs/kit':
+        optional: true
+      next:
+        optional: true
+      react:
+        optional: true
+      svelte:
+        optional: true
+      vue:
+        optional: true
+      vue-router:
+        optional: true
+
+  '@vercel/speed-insights@1.2.0':
+    resolution: {integrity: sha512-y9GVzrUJ2xmgtQlzFP2KhVRoCglwfRQgjyfY607aU0hh0Un6d0OUyrJkjuAlsV18qR4zfoFPs/BiIj9YDS6Wzw==}
+    peerDependencies:
+      '@sveltejs/kit': ^1 || ^2
+      next: '>= 13'
+      react: ^18 || ^19 || ^19.0.0-rc
+      svelte: '>= 4'
+      vue: ^3
+      vue-router: ^4
+    peerDependenciesMeta:
       '@sveltejs/kit':
         optional: true
       next:
@@ -3593,6 +3627,10 @@ snapshots:
     dependencies:
       '@capacitor/core': 7.4.3
 
+  '@capacitor/status-bar@7.0.3(@capacitor/core@7.4.3)':
+    dependencies:
+      '@capacitor/core': 7.4.3
+
   '@cspotcode/source-map-support@0.8.1':
     dependencies:
       '@jridgewell/trace-mapping': 0.3.9
@@ -4305,6 +4343,11 @@ snapshots:
     optional: true
 
   '@vercel/analytics@1.5.0(next@15.5.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)':
+    optionalDependencies:
+      next: 15.5.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      react: 19.1.0
+
+  '@vercel/speed-insights@1.2.0(next@15.5.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)':
     optionalDependencies:
       next: 15.5.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       react: 19.1.0

@@ -9,6 +9,21 @@ const config: CapacitorConfig = {
     url: "https://www.thinkscore.kr",
     cleartext: false,
   },
+  android: {
+    useLegacyBridge: false,
+    allowMixedContent: false,
+    captureInput: true,
+    webContentsDebuggingEnabled: false,
+    initialFocus: true,
+    appendUserAgent: "ThinkScore",
+    backgroundColor: "#ffffff",
+  },
+  plugins: {
+    StatusBar: {
+      style: "default",
+      overlaysWebView: false,
+    },
+  },
 };
 
 export default config;
