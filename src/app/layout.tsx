@@ -6,6 +6,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import StructuredData from "@/components/StructuredData";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import SafeAreaInitializer from "@/components/SafeAreaInitializer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -124,7 +125,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased mobile-container`}
       >
         <Script
           src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.6/kakao.min.js"
@@ -137,6 +138,7 @@ export default function RootLayout({
           strategy="afterInteractive"
         />
         <StructuredData type="website" />
+        <SafeAreaInitializer />
         <AuthProvider>{children}</AuthProvider>
         <Analytics />
         <SpeedInsights />
