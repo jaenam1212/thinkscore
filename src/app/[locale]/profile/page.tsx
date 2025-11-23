@@ -12,6 +12,8 @@ import { Answer } from "@/lib/database.types";
 import ScoreResult from "@/components/ScoreResult";
 import ProfileEditModal from "@/components/auth/ProfileEditModal";
 import CustomerSupportModal from "@/components/CustomerSupportModal";
+import { useTranslations } from "next-intl";
+import LanguageSelector from "@/components/LanguageSelector";
 
 interface AnswerWithScore extends Answer {
   question_title?: string;
@@ -22,6 +24,8 @@ interface AnswerWithScore extends Answer {
 }
 
 export default function ProfilePage() {
+  const t = useTranslations("profile");
+  const tCommon = useTranslations("common");
   const { user, isAuthenticated, logout, updateProfile } = useAuth();
   const router = useRouter();
   const [recentAnswers, setRecentAnswers] = useState<AnswerWithScore[]>([]);
@@ -151,8 +155,8 @@ export default function ProfilePage() {
 
   // 프로필 데이터
   const profileData = {
-    name: user?.displayName || "사용자",
-    email: user?.email || "이메일 미제공",
+    name: user?.displayName || tCommon("user"),
+    email: user?.email || t("emailNotProvided"),
     totalTests: recentAnswers.length,
     averageScore:
       recentAnswers.length > 0
@@ -204,7 +208,7 @@ export default function ProfilePage() {
 
       {/* 메인 모바일 뷰 */}
       <div className="min-h-screen bg-stone-50 flex flex-col w-full max-w-sm sm:max-w-md lg:max-w-2xl xl:max-w-4xl mx-auto md:border-x md:border-gray-200 relative lg:flex-shrink-0">
-        <AppHeader title="프로필" subtitle="내 정보 및 활동" />
+        <AppHeader title={t("title")} subtitle={t("subtitle")} />
 
         {/* 메인 컨텐츠 */}
         <div className="flex-1 overflow-y-auto pb-32">
@@ -232,37 +236,37 @@ export default function ProfilePage() {
                 <div className="text-2xl font-bold text-slate-600">
                   {profileData.totalTests}
                 </div>
-                <div className="text-sm text-gray-600">총 테스트</div>
+                <div className="text-sm text-gray-600">{t("stats.totalTests")}</div>
               </div>
               <div className="bg-white rounded-xl p-4 border border-gray-200 text-center">
                 <div className="text-2xl font-bold text-slate-600">
                   {profileData.averageScore}
                 </div>
-                <div className="text-sm text-gray-600">평균 점수</div>
+                <div className="text-sm text-gray-600">{t("stats.averageScore")}</div>
               </div>
               <div className="bg-white rounded-xl p-4 border border-gray-200 text-center">
                 <div className="text-2xl font-bold text-slate-600">
                   {profileData.bestScore}
                 </div>
-                <div className="text-sm text-gray-600">최고 점수</div>
+                <div className="text-sm text-gray-600">{t("stats.bestScore")}</div>
               </div>
               <div className="bg-white rounded-xl p-4 border border-gray-200 text-center">
                 <div className="text-2xl font-bold text-slate-600">
                   #{profileData.rank}
                 </div>
-                <div className="text-sm text-gray-600">현재 순위</div>
+                <div className="text-sm text-gray-600">{t("stats.currentRank")}</div>
               </div>
             </div>
 
             {/* 최근 답변 기록 */}
             <div className="mb-6">
               <h3 className="text-lg font-bold text-gray-800 mb-3">
-                최근 답변 기록
+                {t("recentAnswers")}
               </h3>
               {loading ? (
                 <div className="text-center py-8">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-600 mx-auto"></div>
-                  <p className="text-gray-500 mt-2">로딩 중...</p>
+                  <p className="text-gray-500 mt-2">{tCommon("loading")}</p>
                 </div>
               ) : recentAnswers.length > 0 ? (
                 <div className="space-y-3">
@@ -288,7 +292,7 @@ export default function ProfilePage() {
                           </div>
                           {answer.score !== undefined && (
                             <div className="text-xs text-blue-600">
-                              📊 평가 결과 보기
+                              {t("viewScore")}
                             </div>
                           )}
                         </div>
@@ -299,12 +303,12 @@ export default function ProfilePage() {
                             </div>
                             <div className="text-xs text-gray-500">
                               {answer.score >= 90
-                                ? "🏆 우수"
+                                ? t("scoreLabel.excellent")
                                 : answer.score >= 80
-                                  ? "👍 양호"
+                                  ? t("scoreLabel.good")
                                   : answer.score >= 60
-                                    ? "📚 보통"
-                                    : "💪 노력"}
+                                    ? t("scoreLabel.average")
+                                    : t("scoreLabel.needsWork")}
                             </div>
                           </div>
                         )}
@@ -314,9 +318,9 @@ export default function ProfilePage() {
                 </div>
               ) : (
                 <div className="bg-white rounded-xl p-6 border border-gray-200 text-center">
-                  <p className="text-gray-500">아직 작성한 답변이 없습니다.</p>
+                  <p className="text-gray-500">{t("noAnswers")}</p>
                   <p className="text-sm text-gray-400 mt-1">
-                    첫 번째 답변을 작성해보세요!
+                    {t("firstAnswer")}
                   </p>
                 </div>
               )}
@@ -324,11 +328,11 @@ export default function ProfilePage() {
 
             {/* 설정 옵션 */}
             <div className="mb-6">
-              <h3 className="text-lg font-bold text-gray-800 mb-3">설정</h3>
+              <h3 className="text-lg font-bold text-gray-800 mb-3">{t("settings.title")}</h3>
               <div className="bg-white rounded-xl border border-gray-200 divide-y divide-gray-200">
                 <button className="w-full text-left p-4 hover:bg-gray-50 transition-colors">
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-800">알림 설정</span>
+                    <span className="text-gray-800">{t("settings.notifications")}</span>
                     <svg
                       className="w-5 h-5 text-gray-400"
                       fill="none"
@@ -344,12 +348,13 @@ export default function ProfilePage() {
                     </svg>
                   </div>
                 </button>
+                <LanguageSelector />
                 <button
                   onClick={() => setShowEditModal(true)}
                   className="w-full text-left p-4 hover:bg-gray-50 transition-colors"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-800">개인정보 수정</span>
+                    <span className="text-gray-800">{t("settings.editProfile")}</span>
                     <svg
                       className="w-5 h-5 text-gray-400"
                       fill="none"
@@ -370,7 +375,7 @@ export default function ProfilePage() {
                   className="w-full text-left p-4 hover:bg-gray-50 transition-colors"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-800">고객센터</span>
+                    <span className="text-gray-800">{t("settings.support")}</span>
                     <svg
                       className="w-5 h-5 text-gray-400"
                       fill="none"
@@ -390,7 +395,7 @@ export default function ProfilePage() {
                   onClick={handleLogout}
                   className="w-full text-left p-4 hover:bg-gray-50 transition-colors text-red-600"
                 >
-                  <span>로그아웃</span>
+                  <span>{t("settings.logout")}</span>
                 </button>
               </div>
             </div>
@@ -409,7 +414,7 @@ export default function ProfilePage() {
           <ScoreResult
             score={selectedAnswer.score}
             feedback={
-              selectedAnswer.feedback || "피드백이 제공되지 않았습니다."
+              selectedAnswer.feedback || t("noFeedback")
             }
             criteriaScores={selectedAnswer.criteriaScores}
             onRetry={handleCloseScoreModal}

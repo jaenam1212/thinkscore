@@ -1,0 +1,66 @@
+{
+  "common": {
+    "appName": "ThinkScore",
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "close": "Close",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "edit": "Edit",
+    "logout": "Logout",
+    "login": "Login",
+    "register": "Sign Up",
+    "user": "User"
+  },
+  "nav": {
+    "home": "Home",
+    "forum": "Forum",
+    "ranking": "Ranking",
+    "profile": "Profile"
+  },
+  "profile": {
+    "title": "Profile",
+    "subtitle": "My Information & Activity",
+    "mobileApp": "ThinkScore Mobile App",
+    "mobileAppDesc": "Access more conveniently on your smartphone",
+    "qrCode": "QR Code",
+    "qrCodeDesc": "Quick access via QR code",
+    "stats": {
+      "totalTests": "Total Tests",
+      "averageScore": "Average Score",
+      "bestScore": "Best Score",
+      "currentRank": "Current Rank"
+    },
+    "recentAnswers": "Recent Answers",
+    "noAnswers": "No answers submitted yet.",
+    "firstAnswer": "Submit your first answer!",
+    "viewScore": "📊 View Results",
+    "scoreLabel": {
+      "excellent": "🏆 Excellent",
+      "good": "👍 Good",
+      "average": "📚 Average",
+      "needsWork": "💪 Keep Going"
+    },
+    "settings": {
+      "title": "Settings",
+      "notifications": "Notifications",
+      "language": "Language",
+      "editProfile": "Edit Profile",
+      "support": "Support",
+      "logout": "Logout"
+    },
+    "emailNotProvided": "Email not provided",
+    "noFeedback": "No feedback provided."
+  },
+  "language": {
+    "korean": "한국어",
+    "english": "English",
+    "selectLanguage": "Select Language",
+    "currentLanguage": "Current Language"
+  },
+  "home": {
+    "title": "AI-Powered Critical Thinking Assessment Platform",
+    "description": "AI-evaluated creative thinking test. Comprehensively measure logical reasoning, creativity, and critical thinking with personalized feedback."
+  }
+}
