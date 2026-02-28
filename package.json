@@ -21,6 +21,7 @@
     "@capacitor/ios": "^7.4.3",
     "@capacitor/status-bar": "^7.0.3",
     "@capawesome/capacitor-android-edge-to-edge-support": "^7.2.3",
+    "@revenuecat/purchases-capacitor": "11.3.2",
     "@types/kakao-js-sdk": "^1.39.5",
     "@vercel/analytics": "^1.5.0",
     "@vercel/speed-insights": "^1.2.0",

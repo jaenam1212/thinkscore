@@ -21,8 +21,8 @@ export default function AppHeader({
 
   return (
     <>
-      <header className="p-4 border-b border-gray-200 bg-stone-50 sticky top-0 z-10">
-        <div className="flex items-center justify-between mb-4">
+      <header className="border-b border-gray-200 bg-stone-50 sticky top-0 z-10 safe-top">
+        <div className="flex items-center justify-between p-4 mb-0">
           <div className="flex items-center space-x-3">
             <div className="flex-shrink-0">
               <Image
@@ -63,7 +63,7 @@ export default function AppHeader({
             )}
           </div>
         </div>
-        {children && <div>{children}</div>}
+        {children && <div className="px-4 pb-2">{children}</div>}
       </header>
 
       {/* 로그인 모달 */}

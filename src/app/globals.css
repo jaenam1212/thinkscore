@@ -3,6 +3,14 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* Safe area inset CSS variables */
+  /* Android: JS에서 동적으로 덮어씀 (--sat, --sab, --sal, --sar) */
+  /* iOS: env(safe-area-inset-*) 자동 동작 */
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+  --sar: env(safe-area-inset-right, 0px);
 }
 
 @theme inline {
@@ -14,8 +22,8 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #fafaf9;
+    --foreground: #171717;
   }
 }
 
@@ -23,7 +31,9 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
-  /* Remove body padding to prevent scroll issues */
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
 }
 
 /* Fix for viewport height on mobile */
@@ -32,21 +42,19 @@ html, body {
   height: 100dvh; /* Dynamic viewport height */
 }
 
-/* EdgeToEdge plugin handles safe areas automatically - no manual CSS needed */
-
-/* Clean slate - let EdgeToEdge handle everything */
-body {
-  padding: 0;
-  margin: 0;
-  box-sizing: border-box;
+/* Safe area utilities */
+.safe-top {
+  padding-top: var(--sat);
 }
 
-/* Main container - let EdgeToEdge handle the safe areas */
+.safe-bottom {
+  padding-bottom: var(--sab);
+}
+
+/* Main container */
 .mobile-container {
   min-height: 100vh;
   min-height: 100dvh;
   background: var(--background);
   overflow-x: hidden;
 }
-
-/* Clean, simple styles - EdgeToEdge handles all safe area logic automatically */

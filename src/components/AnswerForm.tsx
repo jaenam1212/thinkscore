@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { showToast } from "@/components/ui/Toast";
 import { answerService } from "@/lib/services";
 
 interface AnswerFormProps {
@@ -25,21 +26,9 @@ export default function AnswerForm({
   const [answer, setAnswer] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isEvaluating, setIsEvaluating] = useState(false);
-  const [startTime, setStartTime] = useState<number | null>(null);
-  const [lastKeyTime, setLastKeyTime] = useState<number | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     if (e.target.value.length <= 1000) {
-      const currentTime = Date.now();
-
-      // 입력 시작 시간 기록
-      if (!startTime && e.target.value.length === 1) {
-        setStartTime(currentTime);
-      }
-
-      // 마지막 키 입력 시간 업데이트
-      setLastKeyTime(currentTime);
-
       setAnswer(e.target.value);
 
       // 자동 높이 조절
@@ -49,28 +38,8 @@ export default function AnswerForm({
     }
   };
 
-  const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
-    const pasteText = e.clipboardData.getData("text");
-    if (pasteText.length > 20) {
-      e.preventDefault();
-      alert("AI 치팅은 허용되지 않습니다.");
-    }
-  };
-
   const handleSubmit = async () => {
     if (!answer.trim() || isSubmitting) return;
-
-    // 입력 속도 검증
-    if (startTime && lastKeyTime) {
-      const totalTime = lastKeyTime - startTime;
-      const typingSpeed = answer.length / (totalTime / 1000); // 초당 글자수
-
-      // 초당 10글자 이상이면 의심
-      if (typingSpeed > 10) {
-        alert("AI 치팅은 허용되지 않습니다.");
-        return;
-      }
-    }
 
     try {
       setIsSubmitting(true);
@@ -95,9 +64,6 @@ export default function AnswerForm({
         answerResult.id
       );
 
-      console.log("=== Frontend Evaluation Result ===");
-      console.log("evaluationResult:", evaluationResult);
-
       // 부모 컴포넌트에 점수와 평가 결과 전달
       if (onScoreUpdate) {
         onScoreUpdate(evaluationResult.score);
@@ -106,8 +72,11 @@ export default function AnswerForm({
         onEvaluationComplete(evaluationResult);
       }
     } catch (error) {
-      console.error("답변 제출 중 오류:", error);
-      alert("답변 제출 중 오류가 발생했습니다. 다시 시도해주세요.");
+      const message =
+        error instanceof Error
+          ? error.message
+          : "답변 제출 중 오류가 발생했습니다. 다시 시도해주세요.";
+      showToast(message, "error");
     } finally {
       setIsSubmitting(false);
       setIsEvaluating(false);
@@ -117,7 +86,10 @@ export default function AnswerForm({
   // 평가 완료 후 기존 ScoreResult로 전환 (모달 비활성화)
 
   return (
-    <div className="fixed bottom-16 left-0 right-0   sm:max-w-md lg:max-w-2xl xl:max-w-4xl mx-auto p-4 bg-stone-50 border-t border-gray-200 z-10">
+    <div
+      className="fixed left-0 right-0 sm:max-w-md lg:max-w-2xl xl:max-w-4xl mx-auto p-4 bg-stone-50 border-t border-gray-200 z-10"
+      style={{ bottom: "calc(4rem + var(--sab, 0px))" }}
+    >
       {/* 평가 중일 때 전체 화면 로딩 모달 */}
       {isEvaluating && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
@@ -182,7 +154,6 @@ export default function AnswerForm({
         <textarea
           value={answer}
           onChange={handleInputChange}
-          onPaste={handlePaste}
           placeholder="당신의 생각과 근거를 자유롭게 작성해보세요..."
           className="w-full min-h-[48px] p-4 border-0 rounded-2xl resize-none focus:outline-none text-sm overflow-y-auto"
           rows={1}

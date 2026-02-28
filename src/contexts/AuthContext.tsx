@@ -7,6 +7,11 @@ import {
   useEffect,
   ReactNode,
 } from "react";
+import {
+  initializePurchases,
+  loginToPurchases,
+  logoutFromPurchases,
+} from "@/lib/purchases";
 
 interface User {
   id: string;
@@ -66,6 +71,23 @@ interface AppleUserData {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+
+async function apiPost(
+  path: string,
+  body: unknown,
+  token?: string | null
+): Promise<Response> {
+  return fetch(`${API_BASE}${path}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify(body),
+  });
+}
+
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
@@ -83,6 +105,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const syncPurchasesForUser = async (userId: string) => {
+    try {
+      await initializePurchases(userId);
+      await loginToPurchases(userId);
+    } catch {
+      return;
+    }
+  };
+
   // 로컬 스토리지에서 토큰 로드
   useEffect(() => {
     const savedToken = localStorage.getItem("auth_token");
@@ -97,14 +128,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const fetchUserProfile = async (authToken: string) => {
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/auth/profile`,
-        {
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-          },
-        }
-      );
+      const response = await fetch(`${API_BASE}/auth/profile`, {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
 
       if (response.ok) {
         const userData = await response.json();
@@ -113,6 +139,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           email: userData.email,
           displayName: userData.displayName,
         });
+        await syncPurchasesForUser(userData.id);
       } else {
         localStorage.removeItem("auth_token");
         setToken(null);
@@ -127,16 +154,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   const login = async (email: string, password: string) => {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/auth/login`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      }
-    );
+    const response = await apiPost("/auth/login", { email, password });
 
     if (!response.ok) {
       const errorData = await response.json();
@@ -152,6 +170,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     });
     setToken(access_token);
     localStorage.setItem("auth_token", access_token);
+    await syncPurchasesForUser(userData.id);
   };
 
   const register = async (
@@ -159,16 +178,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     password: string,
     displayName?: string
   ) => {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/auth/register`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password, displayName }),
-      }
-    );
+    const response = await apiPost("/auth/register", {
+      email,
+      password,
+      displayName,
+    });
 
     if (!response.ok) {
       const errorData = await response.json();
@@ -184,30 +198,22 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     });
     setToken(access_token);
     localStorage.setItem("auth_token", access_token);
+    await syncPurchasesForUser(userData.id);
   };
 
   const loginWithKakao = async (
     accessToken: string,
     profile: KakaoUserProfile
   ) => {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/auth/kakao`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          accessToken,
-          profile: {
-            id: profile.id,
-            nickname: profile.nickname,
-            email: profile.email,
-            profileImage: profile.profileImage,
-          },
-        }),
-      }
-    );
+    const response = await apiPost("/auth/kakao", {
+      accessToken,
+      profile: {
+        id: profile.id,
+        nickname: profile.nickname,
+        email: profile.email,
+        profileImage: profile.profileImage,
+      },
+    });
 
     if (!response.ok) {
       const errorData = await response.json();
@@ -215,14 +221,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
 
     const responseData = await response.json();
-
-    // requiresAdditionalInfo가 있으면 추가 정보 입력 필요
-    if (responseData.requiresAdditionalInfo) {
+    if (responseData.requiresAdditionalInfo)
       throw new Error("REQUIRES_ADDITIONAL_INFO");
-    }
 
     const { user: userData, access_token } = responseData;
-
     setUser({
       id: userData.id,
       email: userData.email,
@@ -230,49 +232,29 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     });
     setToken(access_token);
     localStorage.setItem("auth_token", access_token);
+    await syncPurchasesForUser(userData.id);
   };
 
   const loginWithNaver = async (
     accessToken: string,
     profile: NaverUserProfile
   ) => {
-    console.log("loginWithNaver 시작:", {
-      profileId: profile.id,
-      email: profile.email,
-    });
-
-    const apiUrl = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/auth/naver`;
-    console.log("백엔드 API URL:", apiUrl);
-
-    const response = await fetch(apiUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    const response = await apiPost("/auth/naver", {
+      accessToken,
+      profile: {
+        id: profile.id,
+        nickname: profile.nickname,
+        email: profile.email,
+        profile_image: profile.profile_image,
       },
-      body: JSON.stringify({
-        accessToken,
-        profile: {
-          id: profile.id,
-          nickname: profile.nickname,
-          email: profile.email,
-          profile_image: profile.profile_image,
-        },
-      }),
     });
-
-    console.log("백엔드 응답 상태:", response.status, response.statusText);
 
     if (!response.ok) {
       const errorData = await response.json();
-      console.error("백엔드 에러:", errorData);
       throw new Error(errorData.message || "네이버 로그인에 실패했습니다.");
     }
 
-    const responseData = await response.json();
-    console.log("백엔드 응답 데이터:", responseData);
-
-    const { user: userData, access_token } = responseData;
-
+    const { user: userData, access_token } = await response.json();
     setUser({
       id: userData.id,
       email: userData.email,
@@ -280,31 +262,18 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     });
     setToken(access_token);
     localStorage.setItem("auth_token", access_token);
+    await syncPurchasesForUser(userData.id);
   };
 
   const loginWithApple = async (idToken: string, user?: AppleUserData) => {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/auth/apple`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          idToken,
-          user,
-        }),
-      }
-    );
+    const response = await apiPost("/auth/apple", { idToken, user });
 
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(errorData.message || "Apple 로그인에 실패했습니다.");
     }
 
-    const responseData = await response.json();
-    const { user: userData, access_token } = responseData;
-
+    const { user: userData, access_token } = await response.json();
     setUser({
       id: userData.id,
       email: userData.email,
@@ -312,18 +281,21 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     });
     setToken(access_token);
     localStorage.setItem("auth_token", access_token);
+    await syncPurchasesForUser(userData.id);
   };
 
   const logout = () => {
     setUser(null);
     setToken(null);
     localStorage.removeItem("auth_token");
+    void logoutFromPurchases();
   };
 
   const updateUserInfo = (userData: User, accessToken: string) => {
     setUser(userData);
     setToken(accessToken);
     localStorage.setItem("auth_token", accessToken);
+    void syncPurchasesForUser(userData.id);
   };
 
   const updateProfile = async (data: {
@@ -334,17 +306,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       throw new Error("인증이 필요합니다.");
     }
 
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/auth/profile`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(data),
-      }
-    );
+    const response = await apiPost("/auth/profile", data, token);
 
     if (!response.ok) {
       const errorData = await response.json();

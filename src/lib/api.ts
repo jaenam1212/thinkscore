@@ -48,7 +48,20 @@ class ApiClient {
     });
 
     if (!response.ok) {
-      throw new Error(`API Error: ${response.status} ${response.statusText}`);
+      let message = `API Error: ${response.status} ${response.statusText}`;
+      try {
+        const errorData = (await response.json()) as {
+          message?: string | string[];
+        };
+        if (Array.isArray(errorData.message)) {
+          message = errorData.message.join(", ");
+        } else if (typeof errorData.message === "string") {
+          message = errorData.message;
+        }
+      } catch {
+        message = `API Error: ${response.status} ${response.statusText}`;
+      }
+      throw new Error(message);
     }
 
     return response.json();

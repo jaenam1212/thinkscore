@@ -7,6 +7,7 @@ import StructuredData from "@/components/StructuredData";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import SafeAreaInitializer from "@/components/SafeAreaInitializer";
+import { ToastProvider } from "@/components/ui/Toast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -121,7 +122,7 @@ export default function RootLayout({
       <head>
         <meta
           name="viewport"
-          content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+          content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
         />
       </head>
       <body
@@ -140,6 +141,7 @@ export default function RootLayout({
         <StructuredData type="website" />
         <SafeAreaInitializer />
         <AuthProvider>{children}</AuthProvider>
+        <ToastProvider />
         <Analytics />
         <SpeedInsights />
       </body>

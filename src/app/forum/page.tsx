@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { showToast } from "@/components/ui/Toast";
 import { useRouter } from "next/navigation";
 import PageLayout from "@/components/layout/PageLayout";
 import ForumHeader from "@/components/forum/ForumHeader";
@@ -105,7 +106,7 @@ export default function ForumPage() {
   // 새 토론 시작하기 핸들러
   const handleStartNewDiscussion = () => {
     if (!user) {
-      alert("로그인이 필요합니다.");
+      showToast("로그인이 필요합니다.", "error");
       return;
     }
     setShowNewPostModal(true);
@@ -114,12 +115,12 @@ export default function ForumPage() {
   // 점수 공유하기 핸들러
   const handleShareScore = async () => {
     if (!user) {
-      alert("로그인이 필요합니다.");
+      showToast("로그인이 필요합니다.", "error");
       return;
     }
 
     if (!selectedBoard) {
-      alert("문제를 선택해주세요.");
+      showToast("문제를 선택해주세요.", "error");
       return;
     }
 
@@ -134,7 +135,10 @@ export default function ForumPage() {
       );
 
       if (!userAnswerData) {
-        alert("이 문제에 대한 답변이 없습니다. 먼저 문제를 풀어주세요.");
+        showToast(
+          "이 문제에 대한 답변이 없습니다. 먼저 문제를 풀어주세요.",
+          "error"
+        );
         setShowScoreModal(false);
         return;
       }
@@ -156,8 +160,7 @@ export default function ForumPage() {
         });
       }
     } catch (error) {
-      console.error("Failed to load user data:", error);
-      alert("데이터를 불러오는데 실패했습니다.");
+      showToast("데이터를 불러오는데 실패했습니다.", "error");
       setShowScoreModal(false);
     } finally {
       setLoadingScore(false);
@@ -167,12 +170,12 @@ export default function ForumPage() {
   // 새 게시물 작성 핸들러
   const handleCreatePost = async () => {
     if (!user) {
-      alert("로그인이 필요합니다.");
+      showToast("로그인이 필요합니다.", "error");
       return;
     }
 
     if (!newPostTitle.trim() || !newPostContent.trim()) {
-      alert("제목과 내용을 모두 입력해주세요.");
+      showToast("제목과 내용을 모두 입력해주세요.", "error");
       return;
     }
 
@@ -200,10 +203,12 @@ export default function ForumPage() {
       );
       setPosts(data);
 
-      alert("새 토론이 성공적으로 작성되었습니다!");
+      showToast("새 토론이 성공적으로 작성되었습니다!", "success");
     } catch (error) {
-      console.error("Failed to create post:", error);
-      alert("토론 작성 중 오류가 발생했습니다. 다시 시도해주세요.");
+      showToast(
+        "토론 작성 중 오류가 발생했습니다. 다시 시도해주세요.",
+        "error"
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -261,10 +266,12 @@ ${additionalThoughts.trim()}`
       const data = await ForumAPI.getPosts(selectedBoard, activeTab);
       setPosts(data);
 
-      alert("점수 공유 게시물이 성공적으로 작성되었습니다!");
+      showToast("점수 공유 게시물이 성공적으로 작성되었습니다!", "success");
     } catch (error) {
-      console.error("Failed to create score post:", error);
-      alert("게시물 작성 중 오류가 발생했습니다. 다시 시도해주세요.");
+      showToast(
+        "게시물 작성 중 오류가 발생했습니다. 다시 시도해주세요.",
+        "error"
+      );
     } finally {
       setIsSubmitting(false);
     }

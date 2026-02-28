@@ -6,11 +6,11 @@ import Link from "next/link";
 export default function BottomNavigation() {
   const pathname = usePathname();
   return (
-    <nav className="fixed bottom-0 left-0 right-0 w-full sm:max-w-md lg:max-w-2xl xl:max-w-4xl mx-auto border-t border-gray-200 bg-stone-50 z-20">
+    <nav className="fixed bottom-0 left-0 right-0 w-full sm:max-w-md lg:max-w-2xl xl:max-w-4xl mx-auto border-t border-gray-200 bg-stone-50 z-20 safe-bottom">
       <div className="grid grid-cols-4">
         <Link
           href="/ranking"
-          className={`flex flex-col items-center py-2 px-2 ${pathname === "/ranking" ? "text-slate-700" : "text-gray-400"}`}
+          className={`flex flex-col items-center py-3 px-2 ${pathname === "/ranking" ? "text-slate-700" : "text-gray-400"}`}
         >
           <svg
             className="w-4 h-4 mb-1"
@@ -29,7 +29,7 @@ export default function BottomNavigation() {
         </Link>
         <Link
           href="/"
-          className={`flex flex-col items-center py-2 px-2 ${pathname === "/" ? "text-slate-700" : "text-gray-400"}`}
+          className={`flex flex-col items-center py-3 px-2 ${pathname === "/" ? "text-slate-700" : "text-gray-400"}`}
         >
           <svg className="w-4 h-4 mb-1" fill="currentColor" viewBox="0 0 24 24">
             <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
@@ -38,7 +38,7 @@ export default function BottomNavigation() {
         </Link>
         <Link
           href="/forum"
-          className={`flex flex-col items-center py-2 px-2 ${pathname === "/forum" ? "text-slate-700" : "text-gray-400"}`}
+          className={`flex flex-col items-center py-3 px-2 ${pathname === "/forum" ? "text-slate-700" : "text-gray-400"}`}
         >
           <svg
             className="w-4 h-4 mb-1"
@@ -57,7 +57,7 @@ export default function BottomNavigation() {
         </Link>
         <Link
           href="/profile"
-          className={`flex flex-col items-center py-2 px-2 ${pathname === "/profile" ? "text-slate-700" : "text-gray-400"}`}
+          className={`flex flex-col items-center py-3 px-2 ${pathname === "/profile" ? "text-slate-700" : "text-gray-400"}`}
         >
           <svg
             className="w-4 h-4 mb-1"

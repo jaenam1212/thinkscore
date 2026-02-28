@@ -41,36 +41,21 @@ export default function QuizContainer() {
   const [userAnswer, setUserAnswer] = useState<string>("");
 
   useEffect(() => {
-    // 백엔드에서 오늘의 문제 로드
     const loadTodaysQuestion = async () => {
       try {
-        console.log("Loading today's question...");
         const question = await questionService.getTodaysQuestion();
-        console.log("Today's question loaded:", question);
         setCurrentQuestion(question);
-      } catch (error) {
-        console.error("Failed to load today's question:", error);
-        console.error("Error details:", {
-          message: (error as Error).message,
-          stack: (error as Error).stack,
-          name: (error as Error).name,
-        });
-        // 실패시 첫 번째 활성 문제 로드
+      } catch {
         try {
-          console.log("Trying to load fallback questions...");
           const questions = await questionService.getActiveQuestions();
-          console.log("Fallback questions loaded:", questions);
-          if (questions.length > 0) {
-            setCurrentQuestion(questions[0]);
-          }
-        } catch (fallbackError) {
-          console.error("Failed to load fallback question:", fallbackError);
+          if (questions.length > 0) setCurrentQuestion(questions[0]);
+        } catch {
+          // no fallback available
         }
       } finally {
         setLoading(false);
       }
     };
-
     loadTodaysQuestion();
   }, []);
 
@@ -174,10 +159,16 @@ export default function QuizContainer() {
                 onClick={() => {
                   setIsSelectMode(false);
                   setActiveTab("today");
-                  // 오늘의 문제로 돌아가기
-                  if (selectedQuestionId) {
-                    window.location.reload(); // 간단하게 새로고침으로 오늘의 문제 로드
-                  }
+                  setSelectedQuestionId(null);
+                  setLoading(true);
+                  questionService
+                    .getTodaysQuestion()
+                    .then(setCurrentQuestion)
+                    .catch(async () => {
+                      const qs = await questionService.getActiveQuestions();
+                      if (qs.length > 0) setCurrentQuestion(qs[0]);
+                    })
+                    .finally(() => setLoading(false));
                 }}
                 className={`flex-1 px-3 py-2 rounded-md text-xs font-medium transition-colors ${
                   activeTab === "today"

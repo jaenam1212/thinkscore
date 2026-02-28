@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { showToast } from "@/components/ui/Toast";
 import { useParams, useRouter } from "next/navigation";
 import PageLayout from "@/components/layout/PageLayout";
 import { ForumAPI, ForumPost, ForumComment } from "@/lib/forum-api";
@@ -91,11 +92,10 @@ export default function ForumPostPage() {
 
     try {
       await ForumAPI.adminDeletePost(postId);
-      alert("게시글이 삭제되었습니다.");
+      showToast("게시글이 삭제되었습니다.", "success");
       router.push("/forum");
     } catch (error) {
-      console.error("Failed to delete post:", error);
-      alert("게시글 삭제에 실패했습니다.");
+      showToast("게시글 삭제에 실패했습니다.", "error");
     }
   };
 
@@ -139,8 +139,7 @@ export default function ForumPostPage() {
         });
       }
     } catch (error) {
-      console.error("Failed to delete comment:", error);
-      alert("댓글 삭제에 실패했습니다.");
+      showToast("댓글 삭제에 실패했습니다.", "error");
     }
   };
 

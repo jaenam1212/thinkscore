@@ -26,6 +26,9 @@ importers:
       '@capawesome/capacitor-android-edge-to-edge-support':
         specifier: ^7.2.3
         version: 7.2.3(@capacitor/core@7.4.3)
+      '@revenuecat/purchases-capacitor':
+        specifier: 11.3.2
+        version: 11.3.2(@capacitor/core@7.4.3)
       '@types/kakao-js-sdk':
         specifier: ^1.39.5
         version: 1.39.5
@@ -527,6 +530,14 @@ packages:
 
   '@prettier/plugin-xml@2.2.0':
     resolution: {integrity: sha512-UWRmygBsyj4bVXvDiqSccwT1kmsorcwQwaIy30yVh8T+Gspx4OlC0shX1y+ZuwXZvgnafmpRYKks0bAu9urJew==}
+
+  '@revenuecat/purchases-capacitor@11.3.2':
+    resolution: {integrity: sha512-3T4/lcAwpbPagrT4DuXvJ+8RewzFmHf3fQJQuhVy+uTQk5HGMHNlXcm2A/UdyHtWqU+/VqWbCClPFYGnpnNXAQ==}
+    peerDependencies:
+      '@capacitor/core': '>=7.0.0'
+
+  '@revenuecat/purchases-typescript-internal-esm@17.25.0':
+    resolution: {integrity: sha512-KC4BjFaQclXqFafG1Enh7t8GSwdg8p905by7UrHq0WSJmLhOR6yXSj6WDv1iwsFSAZxPPwgozNxt+U6IOFTdCA==}
 
   '@rtsao/scc@1.1.0':
     resolution: {integrity: sha512-zt6OdqaDoOnJ1ZYsCYGt9YmWzDXl4vQdKTyJev62gFhRGKdx7mcT54V9KIjg+d2wi9EXsPvAPKe7i7WjfVWB8g==}
@@ -4042,6 +4053,13 @@ snapshots:
     dependencies:
       '@xml-tools/parser': 1.0.11
       prettier: 3.6.2
+
+  '@revenuecat/purchases-capacitor@11.3.2(@capacitor/core@7.4.3)':
+    dependencies:
+      '@capacitor/core': 7.4.3
+      '@revenuecat/purchases-typescript-internal-esm': 17.25.0
+
+  '@revenuecat/purchases-typescript-internal-esm@17.25.0': {}
 
   '@rtsao/scc@1.1.0': {}
 

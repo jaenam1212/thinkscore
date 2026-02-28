@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { showToast } from "@/components/ui/Toast";
 import KakaoLoginButton from "./KakaoLoginButton";
 import AppleLoginButton from "./AppleLoginButton";
 import { KakaoProfile } from "@/lib/kakao";
@@ -42,20 +43,17 @@ export default function LoginForm({
   ) => {
     try {
       await loginWithKakao(accessToken, profile);
-      console.log("카카오 로그인 성공:", profile);
-    } catch (error) {
-      console.error("카카오 로그인 처리 실패:", error);
+    } catch {
       alert("로그인 처리 중 오류가 발생했습니다.");
     }
   };
 
-  const handleKakaoError = (error: Error) => {
-    console.error("카카오 로그인 실패:", error);
+  const handleKakaoError = (_error: Error) => {
     alert("카카오 로그인에 실패했습니다. 다시 시도해 주세요.");
   };
 
   const handleNaverLogin = () => {
-    const clientId = "YLDgJDYDuWExTUVaH7b4";
+    const clientId = process.env.NEXT_PUBLIC_NAVER_CLIENT_ID || "";
     const redirectUri = encodeURIComponent(
       window.location.hostname === "localhost"
         ? "http://localhost:3000/auth/naver/callback"
@@ -72,15 +70,13 @@ export default function LoginForm({
   };
 
   const handleAppleSuccess = () => {
-    console.log("Apple 로그인 성공!");
     // Apple 로그인 성공 시 모달 닫기
     if (onClose) {
       onClose();
     }
   };
 
-  const handleAppleError = (error: Error) => {
-    console.error("Apple 로그인 실패:", error);
+  const handleAppleError = (_error: Error) => {
     alert("Apple 로그인에 실패했습니다. 다시 시도해 주세요.");
   };
 
@@ -155,7 +151,7 @@ export default function LoginForm({
       {/* 소셜 로그인 버튼들 */}
       <div className="space-y-3">
         <button
-          onClick={() => alert("Google 로그인 (준비 중)")}
+          onClick={() => showToast("Google 로그인 (준비 중)", "info")}
           disabled={isLoading}
           className="w-full flex items-center justify-center space-x-3 bg-white border border-gray-300 hover:bg-gray-50 disabled:bg-gray-100 text-gray-700 py-3 px-4 rounded-lg font-medium transition-colors text-base"
         >

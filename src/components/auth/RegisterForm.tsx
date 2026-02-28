@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { showToast } from "@/components/ui/Toast";
 
 interface RegisterFormProps {
   onRegister: (
@@ -29,12 +30,12 @@ export default function RegisterForm({
     if (!email.trim() || !password.trim()) return;
 
     if (password !== confirmPassword) {
-      alert("비밀번호가 일치하지 않습니다.");
+      showToast("비밀번호가 일치하지 않습니다.", "error");
       return;
     }
 
     if (password.length < 6) {
-      alert("비밀번호는 최소 6자 이상이어야 합니다.");
+      showToast("비밀번호는 최소 6자 이상이어야 합니다.", "error");
       return;
     }
 
