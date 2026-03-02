@@ -12,8 +12,9 @@ export async function initializeSafeArea() {
       // Edge-to-edge 활성화 (상태바/네비게이션바 영역까지 웹뷰 확장)
       await EdgeToEdge.enable();
 
-      // 상태바 아이콘 어둡게 (밝은 배경에서 가시성 확보)
-      // setBackgroundColor는 edge-to-edge 모드에서 무효 → 제거
+      // 상태바/네비게이션바 배경색 설정 (흰 배경에서 시스템 아이콘 가시성 확보)
+      // 밝은 배경(#fafaf9) + 어두운 아이콘 = 배터리/신호 등이 잘 보임
+      await EdgeToEdge.setBackgroundColor({ color: "#fafaf9" });
       await StatusBar.setStyle({ style: Style.Dark });
 
       // CSS safe area 변수를 실제 인셋 값으로 설정
