@@ -50,6 +50,9 @@ html, body {
 .safe-bottom {
   padding-bottom: var(--sab);
 }
+.pb-nav-safe {
+  padding-bottom: calc(5rem + var(--sab));
+}
 
 /* Main container */
 .mobile-container {
