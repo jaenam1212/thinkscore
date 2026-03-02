@@ -1,7 +1,7 @@
 import ForumPostClient from "./ForumPostClient";
 
 export async function generateStaticParams() {
-  return [];
+  return [{ id: "0" }];
 }
 
 export default function ForumPostPage() {
