@@ -1,9 +1,14 @@
+import { Suspense } from "react";
 import ForumPostClient from "./ForumPostClient";
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
   return [];
 }
 
 export default function ForumPostPage() {
-  return <ForumPostClient />;
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ForumPostClient />
+    </Suspense>
+  );
 }
