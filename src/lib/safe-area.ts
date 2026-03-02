@@ -1,12 +1,5 @@
 import { Capacitor } from "@capacitor/core";
 
-interface EdgeToEdgePlugin {
-  enable: () => Promise<void>;
-  getInsets?: () => Promise<{
-    insets: { top: number; bottom: number; left: number; right: number };
-  }>;
-}
-
 export async function initializeSafeArea() {
   const platform = Capacitor.getPlatform();
 
@@ -24,18 +17,23 @@ export async function initializeSafeArea() {
       await StatusBar.setStyle({ style: Style.Dark });
 
       // CSS safe area 변수를 실제 인셋 값으로 설정
-      await applySafeAreaInsets(EdgeToEdge as EdgeToEdgePlugin);
+      await applySafeAreaInsets(EdgeToEdge);
     } catch (error) {
       console.warn("Failed to initialize safe area:", error);
     }
   }
 }
 
-async function applySafeAreaInsets(EdgeToEdge: EdgeToEdgePlugin) {
+async function applySafeAreaInsets(EdgeToEdge: {
+  getInsets?: (...args: unknown[]) => Promise<unknown>;
+  enable: () => Promise<void>;
+}) {
   try {
     // getInsets() API 사용 시도
     if (typeof EdgeToEdge.getInsets === "function") {
-      const result = await EdgeToEdge.getInsets();
+      const result = (await EdgeToEdge.getInsets!()) as {
+        insets: { top: number; bottom: number; left: number; right: number };
+      };
       const { top, bottom, left, right } = result.insets;
       setSafeAreaCSSVars(top, bottom, left, right);
       return;
