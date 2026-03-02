@@ -20,7 +20,7 @@ const config: CapacitorConfig = {
   },
   plugins: {
     StatusBar: {
-      style: "dark",
+      style: "LIGHT", // 밝은 배경 → 검정 아이콘 (배터리/신호 등)
       backgroundColor: "#fafaf9",
       overlaysWebView: false,
     },
