@@ -209,7 +209,13 @@ export default function PrivacyModal({ isOpen, onClose }: PrivacyModalProps) {
         </div>
 
         <div className="p-6 border-t bg-gray-50">
-          <div className="flex justify-end">
+          <div className="flex justify-between items-center">
+            <button
+              onClick={() => window.open("/privacy", "_blank")}
+              className="text-sm text-blue-600 hover:text-blue-800 underline"
+            >
+              전체 페이지에서 보기
+            </button>
             <button
               onClick={onClose}
               className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
