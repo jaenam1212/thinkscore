@@ -33,6 +33,10 @@ interface AuthContextType {
     accessToken: string,
     profile: NaverUserProfile
   ) => Promise<void>;
+  loginWithGoogle: (
+    accessToken: string,
+    profile: GoogleUserProfile
+  ) => Promise<void>;
   loginWithApple: (idToken: string, user?: AppleUserData) => Promise<void>;
   register: (
     email: string,
@@ -59,6 +63,13 @@ interface NaverUserProfile {
   nickname: string;
   email: string;
   profile_image: string;
+}
+
+interface GoogleUserProfile {
+  id: string;
+  name: string;
+  email: string;
+  picture: string;
 }
 
 interface AppleUserData {
@@ -265,6 +276,46 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     await syncPurchasesForUser(userData.id);
   };
 
+  const loginWithGoogle = async (
+    accessToken: string,
+    profile: GoogleUserProfile
+  ) => {
+    const response = await apiPost("/auth/google", {
+      accessToken,
+      profile: {
+        id: profile.id,
+        name: profile.name,
+        email: profile.email,
+        picture: profile.picture,
+      },
+    });
+
+    if (!response.ok) {
+      let errorMessage = "Google 로그인에 실패했습니다.";
+      try {
+        const errorData = await response.json();
+        errorMessage =
+          errorData.message ??
+          errorData.error ??
+          (Array.isArray(errorData.message) ? errorData.message[0] : null) ??
+          errorMessage;
+      } catch {
+        errorMessage = `서버 오류 (${response.status})`;
+      }
+      throw new Error(errorMessage);
+    }
+
+    const { user: userData, access_token } = await response.json();
+    setUser({
+      id: userData.id,
+      email: userData.email,
+      displayName: userData.displayName,
+    });
+    setToken(access_token);
+    localStorage.setItem("auth_token", access_token);
+    await syncPurchasesForUser(userData.id);
+  };
+
   const loginWithApple = async (idToken: string, user?: AppleUserData) => {
     const response = await apiPost("/auth/apple", { idToken, user });
 
@@ -329,6 +380,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     login,
     loginWithKakao,
     loginWithNaver,
+    loginWithGoogle,
     loginWithApple,
     register,
     logout,

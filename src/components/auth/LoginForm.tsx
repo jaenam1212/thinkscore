@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { showToast } from "@/components/ui/Toast";
 import KakaoLoginButton from "./KakaoLoginButton";
 import AppleLoginButton from "./AppleLoginButton";
 import { KakaoProfile } from "@/lib/kakao";
@@ -50,6 +49,26 @@ export default function LoginForm({
 
   const handleKakaoError = (_error: Error) => {
     alert("카카오 로그인에 실패했습니다. 다시 시도해 주세요.");
+  };
+
+  const handleGoogleLogin = () => {
+    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+    if (!clientId) {
+      alert(
+        "Google 로그인 설정이 되지 않았습니다. .env.local에 NEXT_PUBLIC_GOOGLE_CLIENT_ID를 확인하세요."
+      );
+      return;
+    }
+    const redirectUri = `${window.location.origin}/auth/google/callback`;
+    sessionStorage.setItem("google_redirect_uri", redirectUri);
+
+    const state = Math.random().toString(36).substring(2, 15);
+    sessionStorage.setItem("google_state", state);
+
+    const scope = encodeURIComponent("openid email profile");
+    const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${scope}&state=${state}`;
+
+    window.location.href = googleAuthUrl;
   };
 
   const handleNaverLogin = () => {
@@ -151,7 +170,7 @@ export default function LoginForm({
       {/* 소셜 로그인 버튼들 */}
       <div className="space-y-3">
         <button
-          onClick={() => showToast("Google 로그인 (준비 중)", "info")}
+          onClick={handleGoogleLogin}
           disabled={isLoading}
           className="w-full flex items-center justify-center space-x-3 bg-white border border-gray-300 hover:bg-gray-50 disabled:bg-gray-100 text-gray-700 py-3 px-4 rounded-lg font-medium transition-colors text-base"
         >

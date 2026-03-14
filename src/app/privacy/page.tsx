@@ -164,6 +164,15 @@ export default function PrivacyPage() {
                 서비스를 제공합니다:
               </p>
               <div className="space-y-3">
+                <div className="border-l-4 border-blue-400 pl-4">
+                  <h3 className="font-medium text-gray-800">Google 로그인</h3>
+                  <p className="text-sm text-gray-600">
+                    수집정보: 이메일, 이름, 프로필 이미지
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    Google의 개인정보처리방침을 따릅니다.
+                  </p>
+                </div>
                 <div className="border-l-4 border-yellow-400 pl-4">
                   <h3 className="font-medium text-gray-800">카카오 로그인</h3>
                   <p className="text-sm text-gray-600">
