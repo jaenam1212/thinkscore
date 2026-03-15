@@ -8,6 +8,7 @@ import AppHeader from "@/components/layout/AppHeader";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { answerService, scoreService, questionService } from "@/lib/services";
+import { RankingAPI } from "@/lib/ranking-api";
 import { Answer } from "@/lib/database.types";
 import ScoreResult from "@/components/ScoreResult";
 import ProfileEditModal from "@/components/auth/ProfileEditModal";
@@ -32,6 +33,7 @@ export default function ProfilePage() {
   const [showScoreModal, setShowScoreModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showSupportModal, setShowSupportModal] = useState(false);
+  const [myRank, setMyRank] = useState<number | null>(null);
 
   // 로그인하지 않은 경우 홈으로 리다이렉트
   useEffect(() => {
@@ -69,45 +71,7 @@ export default function ProfilePage() {
                 score: latestScore?.score,
                 scoreDate: latestScore?.created_at,
                 feedback: latestScore?.reason,
-                // 기본 criteriaScores (실제 구현시 latestScore에서 가져와야 함)
-                criteriaScores:
-                  latestScore?.score !== undefined
-                    ? latestScore.score === 0
-                      ? {
-                          "논리적 사고": 0,
-                          "창의적 사고": 0,
-                          일관성: 0,
-                        }
-                      : {
-                          "논리적 사고": Math.round(
-                            Math.min(
-                              100,
-                              Math.max(
-                                1,
-                                latestScore.score + Math.random() * 10 - 5
-                              )
-                            )
-                          ),
-                          "창의적 사고": Math.round(
-                            Math.min(
-                              100,
-                              Math.max(
-                                1,
-                                latestScore.score + Math.random() * 10 - 5
-                              )
-                            )
-                          ),
-                          일관성: Math.round(
-                            Math.min(
-                              100,
-                              Math.max(
-                                1,
-                                latestScore.score + Math.random() * 10 - 5
-                              )
-                            )
-                          ),
-                        }
-                    : undefined,
+                criteriaScores: latestScore?.criteria_scores,
               };
             } catch (error) {
               console.error(
@@ -129,6 +93,14 @@ export default function ProfilePage() {
           .slice(0, 5);
 
         setRecentAnswers(sortedAnswers);
+
+        // 내 순위 조회
+        try {
+          const rankData = await RankingAPI.getMyOverallRank();
+          setMyRank(rankData.rank_position);
+        } catch {
+          // 순위 조회 실패는 무시 (답변이 없거나 네트워크 오류)
+        }
       } catch (error) {
         console.error("사용자 데이터 로딩 중 오류:", error);
       } finally {
@@ -171,7 +143,7 @@ export default function ProfilePage() {
               .map((a) => a.score || 0)
           )
         : 0,
-    rank: 7, // 임시 값
+    rank: myRank,
   };
 
   const formatDate = (dateString: string) => {
@@ -248,7 +220,7 @@ export default function ProfilePage() {
               </div>
               <div className="bg-white rounded-xl p-4 border border-gray-200 text-center">
                 <div className="text-2xl font-bold text-slate-600">
-                  #{profileData.rank}
+                  {profileData.rank !== null ? `#${profileData.rank}` : "-"}
                 </div>
                 <div className="text-sm text-gray-600">현재 순위</div>
               </div>

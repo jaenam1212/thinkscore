@@ -34,6 +34,7 @@ export interface Score {
   answer_id: number;
   score: number;
   reason?: string;
+  criteria_scores?: Record<string, number>;
   created_at: string;
   answers?: Answer;
 }
