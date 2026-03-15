@@ -320,8 +320,18 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const response = await apiPost("/auth/apple", { idToken, user });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Apple 로그인에 실패했습니다.");
+      let errorMessage = "Apple 로그인에 실패했습니다.";
+      try {
+        const errorData = await response.json();
+        errorMessage =
+          errorData.message ??
+          errorData.error ??
+          (Array.isArray(errorData.message) ? errorData.message[0] : null) ??
+          errorMessage;
+      } catch {
+        errorMessage = `서버 오류 (${response.status})`;
+      }
+      throw new Error(errorMessage);
     }
 
     const { user: userData, access_token } = await response.json();

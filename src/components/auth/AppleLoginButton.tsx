@@ -51,26 +51,18 @@ export default function AppleLoginButton({
 
   // Apple SDK 초기화
   React.useEffect(() => {
-    console.log("Apple Client ID:", process.env.NEXT_PUBLIC_APPLE_CLIENT_ID);
-
     const initAppleID = () => {
       if (window.AppleID && process.env.NEXT_PUBLIC_APPLE_CLIENT_ID) {
         try {
           window.AppleID.auth.init({
             clientId: process.env.NEXT_PUBLIC_APPLE_CLIENT_ID,
             scope: "name email",
-            redirectURI: "https://www.thinkscore.kr/auth/apple/callback",
+            redirectURI: window.location.origin,
             usePopup: true,
           });
-          console.log("Apple ID SDK 초기화 완료");
         } catch (error) {
           console.error("Apple ID SDK 초기화 실패:", error);
         }
-      } else {
-        console.error("Apple ID 초기화 실패: SDK 또는 Client ID 없음", {
-          appleID: !!window.AppleID,
-          clientId: process.env.NEXT_PUBLIC_APPLE_CLIENT_ID,
-        });
       }
     };
 
@@ -116,7 +108,7 @@ export default function AppleLoginButton({
             window.AppleID.auth.init({
               clientId: process.env.NEXT_PUBLIC_APPLE_CLIENT_ID,
               scope: "name email",
-              redirectURI: "https://www.thinkscore.kr/auth/apple/callback",
+              redirectURI: window.location.origin,
               usePopup: true,
             });
             // 초기화 후 다시 시도
