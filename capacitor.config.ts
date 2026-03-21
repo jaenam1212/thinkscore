@@ -3,7 +3,8 @@ import type { CapacitorConfig } from "@capacitor/cli";
 const config: CapacitorConfig = {
   appId: "app.thinkscore.com",
   appName: "ThinkScore",
-  webDir: ".next",
+  // Next.js 모바일 빌드: BUILD_MODE=mobile → output: "export", distDir: "out" (next.config.ts)
+  webDir: "out",
   server: {
     androidScheme: "https",
     url: "https://www.thinkscore.kr",

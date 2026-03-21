@@ -56,6 +56,5 @@ ios/App/DerivedData/
 android/app/build/
 android/build/
 
-# Capacitor
-android/
-ios/
+# Capacitor 네이티브 프로젝트는 커밋 권장 (Windows ↔ Mac 이동 시 재생성·설정 누락 방지)
+# 빌드 산출물·Pods 등은 각 플랫폼 .gitignore 및 위쪽 /out/, build/ 규칙으로 제외됨
