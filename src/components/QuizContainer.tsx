@@ -1,10 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import AnswerForm from "./AnswerForm";
 import TextType from "./ui/TextType";
 import ScoreResult from "./ScoreResult";
 import AuthModal from "./auth/AuthModal";
+import ForumQuickShareModal from "./ForumQuickShareModal";
+import { showToast } from "@/components/ui/Toast";
 import { questionService } from "@/lib/services";
 import { Question } from "@/lib/database.types";
 import { useAuth } from "@/contexts/AuthContext";
@@ -19,6 +22,7 @@ type QuestionListItem = {
 };
 
 export default function QuizContainer() {
+  const router = useRouter();
   const { user, isLoading: authLoading } = useAuth();
   const [score, setScore] = useState<number | null>(null);
   const [showScore, setShowScore] = useState(false);
@@ -39,6 +43,9 @@ export default function QuizContainer() {
     null
   );
   const [userAnswer, setUserAnswer] = useState<string>("");
+  const [showQuickShareModal, setShowQuickShareModal] = useState(false);
+  const [pendingOpenShareModalAfterAuth, setPendingOpenShareModalAfterAuth] =
+    useState(false);
 
   useEffect(() => {
     const loadTodaysQuestion = async () => {
@@ -109,6 +116,25 @@ export default function QuizContainer() {
     setUserAnswer("");
   };
 
+  const handleShareToCommunity = () => {
+    if (!currentQuestion) return;
+    if (!user) {
+      showToast("로그인 후 커뮤니티에 올릴 수 있어요.", "error");
+      setPendingOpenShareModalAfterAuth(true);
+      setShowAuthModal(true);
+      return;
+    }
+    setShowQuickShareModal(true);
+  };
+
+  useEffect(() => {
+    if (user && pendingOpenShareModalAfterAuth) {
+      setShowQuickShareModal(true);
+      setPendingOpenShareModalAfterAuth(false);
+      setShowAuthModal(false);
+    }
+  }, [user, pendingOpenShareModalAfterAuth]);
+
   const formatDate = (date: Date) => {
     const month = date.getMonth() + 1;
     const day = date.getDate();
@@ -128,8 +154,27 @@ export default function QuizContainer() {
       <AuthModal
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
+        onDismiss={() => setPendingOpenShareModalAfterAuth(false)}
         initialMode="login"
       />
+
+      {showQuickShareModal &&
+        score !== null &&
+        currentQuestion &&
+        user &&
+        userAnswer && (
+          <ForumQuickShareModal
+            isOpen={showQuickShareModal}
+            onClose={() => setShowQuickShareModal(false)}
+            onPosted={(postId) => router.push(`/forum/${postId}`)}
+            questionId={currentQuestion.id}
+            questionTitle={currentQuestion.title}
+            userAnswer={userAnswer}
+            totalScore={score}
+            feedback={evaluation?.feedback ?? ""}
+            criteriaScores={evaluation?.criteriaScores}
+          />
+        )}
 
       {/* 점수 결과 표시 */}
       {showScore && score !== null && (
@@ -139,6 +184,7 @@ export default function QuizContainer() {
           criteriaScores={evaluation?.criteriaScores}
           onRetry={handleRetry}
           onClose={handleRetry}
+          onShareToCommunity={handleShareToCommunity}
           question={{
             title: currentQuestion?.title || "",
             content: currentQuestion?.content || "",

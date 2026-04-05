@@ -8,6 +8,8 @@ interface ScoreResultProps {
   criteriaScores?: Record<string, number>;
   onRetry?: () => void;
   onClose?: () => void;
+  /** 포럼에 답변·점수를 그대로 올릴 때 (로그인·게시판 연동은 부모에서 처리) */
+  onShareToCommunity?: () => void;
   question?: {
     title: string;
     content: string;
@@ -22,6 +24,7 @@ export default function ScoreResult({
   criteriaScores,
   onRetry,
   onClose,
+  onShareToCommunity,
   question,
 }: ScoreResultProps) {
   // 피드백을 강점과 개선점으로 분리
@@ -215,6 +218,28 @@ export default function ScoreResult({
 
             {/* 액션 버튼들 */}
             <div className="mt-3 space-y-2 pointer-events-auto">
+              {onShareToCommunity && (
+                <button
+                  type="button"
+                  onClick={onShareToCommunity}
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 px-4 rounded-lg font-medium text-sm transition-colors flex items-center justify-center space-x-2"
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"
+                    />
+                  </svg>
+                  <span>커뮤니티에 올리기</span>
+                </button>
+              )}
               {onRetry && (
                 <button
                   onClick={onRetry}

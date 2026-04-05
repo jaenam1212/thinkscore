@@ -9,6 +9,7 @@ interface UserAnswer {
   scores?: Array<{
     score: number;
     reason: string;
+    criteria_scores?: Record<string, number> | null;
   }>;
 }
 

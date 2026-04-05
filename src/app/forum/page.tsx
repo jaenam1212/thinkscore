@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef, Suspense } from "react";
 import { showToast } from "@/components/ui/Toast";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import PageLayout from "@/components/layout/PageLayout";
 import ForumHeader from "@/components/forum/ForumHeader";
 import ForumPostCard from "@/components/forum/ForumPostCard";
@@ -15,6 +15,7 @@ import {
 } from "@/lib/forum-api";
 import { useAuth } from "@/contexts/AuthContext";
 import { apiClient } from "@/lib/api";
+import { buildScoreSharePostBody } from "@/lib/score-share-post";
 
 interface UserAnswer {
   id: number;
@@ -25,11 +26,13 @@ interface UserAnswer {
   scores?: Array<{
     score: number;
     reason: string;
+    criteria_scores?: Record<string, number> | null;
   }>;
 }
 
-export default function ForumPage() {
+function ForumPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<"all" | "popular" | "recent">(
     "all"
@@ -56,6 +59,7 @@ export default function ForumPage() {
   } | null>(null);
   const [additionalThoughts, setAdditionalThoughts] = useState("");
   const [loadingScore, setLoadingScore] = useState(false);
+  const shareFromQuizInFlight = useRef(false);
 
   // 게시판 목록 가져오기
   useEffect(() => {
@@ -112,7 +116,115 @@ export default function ForumPage() {
     setShowNewPostModal(true);
   };
 
-  // 점수 공유하기 핸들러
+  const openShareScoreModalForQuestion = useCallback(
+    async (questionId: number) => {
+      if (!user) {
+        showToast("로그인이 필요합니다.", "error");
+        return;
+      }
+
+      try {
+        setLoadingScore(true);
+        setShowScoreModal(true);
+        setSelectedBoard(questionId);
+
+        const userAnswerData = await apiClient.getUserAnswerForQuestion(
+          user.id,
+          questionId
+        );
+
+        if (!userAnswerData) {
+          showToast(
+            "이 문제에 대한 답변이 없습니다. 먼저 문제를 풀어주세요.",
+            "error"
+          );
+          setShowScoreModal(false);
+          return;
+        }
+
+        setUserAnswer(userAnswerData);
+
+        if (userAnswerData.scores && userAnswerData.scores.length > 0) {
+          const scoreData = userAnswerData.scores[0];
+          const criteria =
+            scoreData.criteria_scores &&
+            typeof scoreData.criteria_scores === "object"
+              ? scoreData.criteria_scores
+              : undefined;
+          setUserScore({
+            total_score: scoreData.score,
+            feedback: scoreData.reason,
+            criteria_scores: criteria,
+          });
+        } else {
+          setUserScore({
+            total_score: 0,
+            feedback: "아직 점수가 매겨지지 않았습니다.",
+          });
+        }
+      } catch {
+        showToast("데이터를 불러오는데 실패했습니다.", "error");
+        setShowScoreModal(false);
+      } finally {
+        setLoadingScore(false);
+      }
+    },
+    [user]
+  );
+
+  // 퀴즈 결과에서 `/forum?shareScore=1&questionId=` 로 진입 시 바로 공유 모달
+  useEffect(() => {
+    const share = searchParams.get("shareScore");
+    const q = searchParams.get("questionId");
+    if (share !== "1" || !q) {
+      shareFromQuizInFlight.current = false;
+      return;
+    }
+    if (boardsLoading || shareFromQuizInFlight.current) return;
+
+    const qid = parseInt(q, 10);
+    if (Number.isNaN(qid)) {
+      router.replace("/forum");
+      return;
+    }
+
+    const boardExists = boards.some((b) => b.id === qid);
+    if (!boardExists) {
+      if (boards.length > 0) {
+        showToast(
+          "이 문제는 커뮤니티 게시판이 없거나 아직 열려 있지 않아요.",
+          "error"
+        );
+      }
+      router.replace("/forum");
+      return;
+    }
+
+    if (!user) {
+      showToast("로그인이 필요합니다.", "error");
+      router.replace("/forum");
+      return;
+    }
+
+    shareFromQuizInFlight.current = true;
+    void (async () => {
+      try {
+        await openShareScoreModalForQuestion(qid);
+      } finally {
+        router.replace("/forum");
+        shareFromQuizInFlight.current = false;
+      }
+    })();
+  }, [
+    searchParams,
+    boardsLoading,
+    boards,
+    user,
+    router,
+    openShareScoreModalForQuestion,
+  ]);
+
+  // 점수 공유하기 핸들러 (포럼에서 게시판 선택 후)
   const handleShareScore = async () => {
     if (!user) {
       showToast("로그인이 필요합니다.", "error");
@@ -124,47 +236,7 @@ export default function ForumPage() {
       return;
     }
 
-    try {
-      setLoadingScore(true);
-      setShowScoreModal(true);
-
-      // 실제 API로 사용자 답변과 점수 조회
-      const userAnswerData = await apiClient.getUserAnswerForQuestion(
-        user.id,
-        selectedBoard
-      );
-
-      if (!userAnswerData) {
-        showToast(
-          "이 문제에 대한 답변이 없습니다. 먼저 문제를 풀어주세요.",
-          "error"
-        );
-        setShowScoreModal(false);
-        return;
-      }
-
-      // 답변과 점수 정보 설정
-      setUserAnswer(userAnswerData);
-
-      // 점수 정보가 있으면 설정
-      if (userAnswerData.scores && userAnswerData.scores.length > 0) {
-        const scoreData = userAnswerData.scores[0]; // 첫 번째 점수 사용
-        setUserScore({
-          total_score: scoreData.score,
-          feedback: scoreData.reason,
-        });
-      } else {
-        setUserScore({
-          total_score: 0,
-          feedback: "아직 점수가 매겨지지 않았습니다.",
-        });
-      }
-    } catch (error) {
-      showToast("데이터를 불러오는데 실패했습니다.", "error");
-      setShowScoreModal(false);
-    } finally {
-      setLoadingScore(false);
-    }
+    await openShareScoreModalForQuestion(selectedBoard);
   };
 
   // 새 게시물 작성 핸들러
@@ -240,21 +312,13 @@ export default function ForumPage() {
 
       const postData: CreatePostData = {
         title: `[${currentBoard?.name}] 내 답변과 점수 공유`,
-        content: `**📝 내 답변:**
-${userAnswer.content}
-
-**🎯 받은 점수:**
-• 총점: ${userScore.total_score}점
-
-**💭 AI 피드백:**
-${userScore.feedback}
-
-${
-  additionalThoughts.trim()
-    ? `**🤔 추가 생각:**
-${additionalThoughts.trim()}`
-    : ""
-}`,
+        content: buildScoreSharePostBody({
+          userAnswer: userAnswer.content,
+          totalScore: userScore.total_score,
+          feedback: userScore.feedback,
+          criteriaScores: userScore.criteria_scores,
+          additionalThoughts,
+        }),
         category: "score_share",
         question_id: selectedBoard,
       };
@@ -560,5 +624,19 @@ ${additionalThoughts.trim()}`
         </div>
       )}
     </PageLayout>
+  );
+}
+
+export default function ForumPage() {
+  return (
+    <Suspense
+      fallback={
+        <PageLayout title="포럼" subtitle="자유로운 철학 토론">
+          <div className="px-4 py-12 text-center text-gray-500">로딩 중...</div>
+        </PageLayout>
+      }
+    >
+      <ForumPageContent />
+    </Suspense>
   );
 }

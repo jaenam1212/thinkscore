@@ -8,12 +8,15 @@ import { useAuth } from "@/contexts/AuthContext";
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
+  /** X 등으로 닫을 때만 (로그인 성공으로 닫는 경우는 호출하지 않음) */
+  onDismiss?: () => void;
   initialMode?: "login" | "register";
 }
 
 export default function AuthModal({
   isOpen,
   onClose,
+  onDismiss,
   initialMode = "login",
 }: AuthModalProps) {
   const [mode, setMode] = useState<"login" | "register">(initialMode);
@@ -58,7 +61,11 @@ export default function AuthModal({
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
       <div className="relative w-full max-w-2xl">
         <button
-          onClick={onClose}
+          type="button"
+          onClick={() => {
+            onDismiss?.();
+            onClose();
+          }}
           className="absolute -top-2 -right-2 w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center text-gray-500 hover:text-gray-700 z-10"
           disabled={isLoading}
         >

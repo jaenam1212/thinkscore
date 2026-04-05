@@ -31,8 +31,10 @@ export default function ForumPostCard({
         {post.title}
       </h3>
 
-      {/* 내용 미리보기 */}
-      <p className="text-sm text-gray-600 mb-3 line-clamp-2">{post.content}</p>
+      {/* 내용 미리보기 (마크다운 기호 제거) */}
+      <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+        {post.content.replace(/\*\*/g, "").replace(/\s+/g, " ").trim()}
+      </p>
 
       {/* 작성자 및 통계 */}
       <div className="flex items-center justify-between">

@@ -6,6 +6,8 @@ import { useParams, useRouter } from "next/navigation";
 import PageLayout from "@/components/layout/PageLayout";
 import { ForumAPI, ForumPost, ForumComment } from "@/lib/forum-api";
 import { useAuth } from "@/contexts/AuthContext";
+import ForumPostBody from "@/components/forum/ForumPostBody";
+import { getForumTopicBadgeLabel } from "@/components/forum/forumTopicBadge";
 
 export default function ForumPostClient() {
   const params = useParams();
@@ -36,14 +38,17 @@ export default function ForumPostClient() {
         setComments(commentsData);
 
         if (isAuthenticated) {
-          const [likeStatusData, adminStatusData] = await Promise.all([
-            ForumAPI.getLikeStatus(postId),
-            ForumAPI.checkAdminStatus(),
-          ]);
-
-          if (likeStatusData && adminStatusData) {
+          try {
+            const likeStatusData = await ForumAPI.getLikeStatus(postId);
             setIsLiked(likeStatusData.liked);
+          } catch {
+            setIsLiked(false);
+          }
+          try {
+            const adminStatusData = await ForumAPI.checkAdminStatus();
             setIsAdmin(adminStatusData.isAdmin);
+          } catch {
+            setIsAdmin(false);
           }
         } else {
           setIsLiked(false);
@@ -214,16 +219,8 @@ export default function ForumPostClient() {
         {/* 게시글 내용 */}
         <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
           <div className="mb-4">
-            <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-sm">
-              {post.category === "free"
-                ? "자유"
-                : post.category === "trolley"
-                  ? "트롤리 딜레마"
-                  : post.category === "brain_vat"
-                    ? "통 속의 뇌"
-                    : post.category === "prisoner"
-                      ? "죄수의 딜레마"
-                      : "테세우스의 배"}
+            <span className="bg-emerald-700 text-white px-3 py-1 rounded-full text-sm font-medium">
+              {getForumTopicBadgeLabel(post)}
             </span>
           </div>
 
@@ -242,8 +239,11 @@ export default function ForumPostClient() {
             </div>
           </div>
 
-          <div className="text-gray-700 mb-6 leading-relaxed">
-            {post.content}
+          <div className="mb-6">
+            <ForumPostBody
+              content={post.content}
+              preferPlain={post.category !== "score_share"}
+            />
           </div>
 
           <div className="flex items-center justify-between">

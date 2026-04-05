@@ -15,6 +15,11 @@ export interface ForumPost {
   category: string;
   is_pinned?: boolean;
   comments?: ForumComment[];
+  question_id?: number;
+  question?: {
+    title: string;
+    description?: string;
+  };
 }
 
 export interface ForumComment {
