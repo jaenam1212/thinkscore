@@ -8,7 +8,10 @@ function renderInlineBold(text: string, keyPrefix: string): React.ReactNode[] {
   return parts.map((part, i) => {
     if (part.startsWith("**") && part.endsWith("**")) {
       return (
-        <strong key={`${keyPrefix}-${i}`} className="font-semibold text-slate-900">
+        <strong
+          key={`${keyPrefix}-${i}`}
+          className="font-semibold text-slate-900"
+        >
           {part.slice(2, -2)}
         </strong>
       );
@@ -33,9 +36,10 @@ function parseContent(content: string): React.ReactNode[] {
     const sectionSameLine = line.match(/^(\*\*.+?:\*\*)\s*(.*)$/);
     if (sectionSameLine) {
       const rawTitle = sectionSameLine[1];
-      const title = rawTitle.startsWith("**") && rawTitle.endsWith("**")
-        ? rawTitle.slice(2, -2)
-        : rawTitle;
+      const title =
+        rawTitle.startsWith("**") && rawTitle.endsWith("**")
+          ? rawTitle.slice(2, -2)
+          : rawTitle;
       const rest = sectionSameLine[2]?.trim() ?? "";
 
       out.push(
@@ -49,10 +53,7 @@ function parseContent(content: string): React.ReactNode[] {
 
       if (rest) {
         out.push(
-          <p
-            key={`p-${k++}`}
-            className="text-slate-700 leading-relaxed mt-2"
-          >
+          <p key={`p-${k++}`} className="text-slate-700 leading-relaxed mt-2">
             {renderInlineBold(rest, `r-${k}`)}
           </p>
         );

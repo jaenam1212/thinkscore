@@ -1,7 +1,9 @@
 import type { ForumPost } from "@/lib/forum-api";
 
 /** 상단 칩에 표시할 주제 (구 카테고리 slug + score_share + 연결된 문제 제목) */
-export function getForumTopicBadgeLabel(post: Pick<ForumPost, "category" | "question">): string {
+export function getForumTopicBadgeLabel(
+  post: Pick<ForumPost, "category" | "question">
+): string {
   const q = post.question?.title?.trim();
 
   if (post.category === "score_share") {
