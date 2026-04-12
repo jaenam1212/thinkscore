@@ -103,7 +103,7 @@ export default function AnswerForm({
                   AI 평가 중...
                 </h3>
                 <p className="text-gray-600">
-                  GPT-5가 당신의 답변을 분석하고 있습니다
+                  GPT-5.4가 당신의 답변을 분석하고 있습니다
                 </p>
               </div>
 
