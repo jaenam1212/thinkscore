@@ -1,6 +1,6 @@
 export default function LeftSidebar() {
   return (
-    <div className="hidden lg:flex lg:flex-1 lg:flex-col lg:justify-center lg:items-center lg:p-8">
+    <div className="hidden 2xl:flex 2xl:flex-1 2xl:flex-col 2xl:justify-center 2xl:items-center 2xl:p-8">
       <div className="text-center space-y-4">
         <h2 className="text-2xl font-bold text-gray-800">
           ThinkScore 모바일 앱

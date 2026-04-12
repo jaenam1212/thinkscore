@@ -1,6 +1,6 @@
 export default function RightSidebar() {
   return (
-    <div className="hidden lg:flex lg:flex-1 lg:flex-col lg:justify-center lg:items-center lg:p-8">
+    <div className="hidden 2xl:flex 2xl:flex-1 2xl:flex-col 2xl:justify-center 2xl:items-center 2xl:p-8">
       <div className="text-center space-y-4">
         <div className="space-y-2">
           <div className="inline-flex items-center space-x-2 bg-black text-white px-4 py-2 rounded-lg">
