@@ -14,7 +14,7 @@ import {
 } from "@/lib/purchases";
 import { useAuth } from "@/contexts/AuthContext";
 
-interface UsePurchasesReturn {
+export interface UsePurchasesReturn {
   /** 현재 사용자가 프리미엄인지 */
   isPremium: boolean;
   /** 구독 만료 일시 */

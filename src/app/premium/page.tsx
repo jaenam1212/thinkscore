@@ -1,12 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { usePurchases } from "@/hooks/usePurchases";
+import { usePremiumAccess } from "@/hooks/usePremiumAccess";
 import { showToast } from "@/components/ui/Toast";
 import PageLayout from "@/components/layout/PageLayout";
 import type { RCPackage } from "@/lib/purchases";
 
 const FEATURES = [
+  {
+    icon: "🚫",
+    title: "광고 제거",
+    description: "월 구독 시 앱·웹에서 배너 광고 영역이 표시되지 않습니다",
+  },
   {
     icon: "🧠",
     title: "무제한 AI 평가",
@@ -40,7 +45,7 @@ export default function PremiumPage() {
     offering,
     purchase,
     restore,
-  } = usePurchases();
+  } = usePremiumAccess();
 
   const [selectedPkgId, setSelectedPkgId] = useState<string | null>(null);
 
@@ -152,12 +157,21 @@ export default function PremiumPage() {
 
         {/* 플랜 선택 */}
         {!isNative ? (
-          // 웹 환경 — 앱 설치 유도
-          <div className="bg-slate-50 rounded-2xl p-6 text-center">
-            <p className="text-sm text-gray-600 mb-3">
-              결제는 iOS / Android 앱에서 진행할 수 있습니다
+          <div className="bg-slate-50 rounded-2xl p-6 text-center space-y-4">
+            <div>
+              <p className="text-sm font-semibold text-gray-800 mb-1">
+                웹 월 구독 · 광고 제거
+              </p>
+              <p className="text-xs text-gray-600 leading-relaxed">
+                토스페이먼츠 정기결제로 결제하면 서버에 구독이 반영되고,
+                웹에서도 프리미엄·광고 제거가 적용됩니다. (결제 UI·웹훅은 토스
+                문서에 맞춰 백엔드에서 연결하세요.)
+              </p>
+            </div>
+            <p className="text-xs text-gray-500">
+              iOS / Android 앱에서는 스토어 인앱 구독을 사용합니다.
             </p>
-            <div className="flex gap-3 justify-center">
+            <div className="flex gap-3 justify-center flex-wrap">
               <a
                 href="https://apps.apple.com/app/thinkscore"
                 target="_blank"
@@ -277,9 +291,8 @@ export default function PremiumPage() {
 
         {/* 법적 고지 */}
         <p className="mt-6 text-center text-xs text-gray-300 leading-relaxed">
-          구독은 구매 확인 후 Apple ID / Google Play 계정에 청구됩니다.
-          <br />
-          구독은 자동 갱신되며, 갱신 24시간 전까지 취소할 수 있습니다.
+          앱 구독: Apple ID / Google Play 계정으로 청구·자동 갱신됩니다.
+          <br />웹 구독: 토스페이먼츠 정기결제 정책이 적용됩니다.
         </p>
       </div>
     </PageLayout>

@@ -2,6 +2,7 @@ import LeftSidebar from "./LeftSidebar";
 import RightSidebar from "./RightSidebar";
 import BottomNavigation from "./BottomNavigation";
 import AppHeader from "./AppHeader";
+import AdSlot from "@/components/ads/AdSlot";
 
 interface PageLayoutProps {
   children: React.ReactNode;
@@ -28,6 +29,8 @@ export default function PageLayout({
         <div className={`flex-1 overflow-y-auto pb-nav-safe ${className}`}>
           {children}
         </div>
+
+        <AdSlot />
 
         <BottomNavigation />
       </div>
