@@ -155,7 +155,7 @@ export default function AnswerForm({
           value={answer}
           onChange={handleInputChange}
           placeholder="당신의 생각과 근거를 자유롭게 작성해보세요..."
-          className="w-full min-h-[48px] p-4 border-0 rounded-2xl resize-none focus:outline-none text-sm overflow-y-auto"
+          className="w-full min-h-[48px] p-4 border-0 rounded-2xl resize-none focus:outline-none text-base overflow-y-auto"
           rows={1}
           disabled={isSubmitting}
           style={{

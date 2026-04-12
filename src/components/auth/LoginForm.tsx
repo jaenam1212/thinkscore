@@ -71,6 +71,7 @@ export default function LoginForm({
     window.location.href = googleAuthUrl;
   };
 
+  /* 네이버 로그인 — 재도입 시 아래 주석 해제
   const handleNaverLogin = () => {
     const clientId = process.env.NEXT_PUBLIC_NAVER_CLIENT_ID || "";
     const redirectUri = encodeURIComponent(
@@ -87,6 +88,7 @@ export default function LoginForm({
 
     window.location.href = naverAuthUrl;
   };
+  */
 
   const handleAppleSuccess = () => {
     // Apple 로그인 성공 시 모달 닫기
@@ -195,6 +197,7 @@ export default function LoginForm({
           <span>Google로 시작하기</span>
         </button>
 
+        {/* 네이버 로그인 — 재도입 시 handleNaverLogin 주석 해제 후 아래 버튼 복구
         <button
           onClick={handleNaverLogin}
           disabled={isLoading}
@@ -205,6 +208,7 @@ export default function LoginForm({
           </svg>
           <span>네이버로 시작하기</span>
         </button>
+        */}
 
         <KakaoLoginButton
           onSuccess={handleKakaoSuccess}

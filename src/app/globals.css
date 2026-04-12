@@ -61,3 +61,15 @@ html, body {
   background: var(--background);
   overflow-x: hidden;
 }
+
+/*
+ * 모바일 브라우저(iOS Safari 등): 입력란 포커스 시 자동 확대는
+ * 폼 컨트롤 computed font-size < 16px 일 때 자주 발생한다.
+ */
+@media screen and (max-width: 768px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
