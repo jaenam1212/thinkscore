@@ -47,6 +47,7 @@ export default function ScoreResult({
 
   // 이미 한국어로 온 경우 그대로 사용, 혹시 영어로 온 경우 매핑
   const criteriaMapping: Record<string, string> = {
+    "질문 적합도": "질문 적합도",
     "논리적 사고": "논리적 사고",
     "창의적 사고": "창의적 사고",
     일관성: "일관성",
@@ -58,6 +59,7 @@ export default function ScoreResult({
 
   // 기본값 설정 (AI 데이터가 없을 때만)
   const defaultCriteriaScores = {
+    "질문 적합도": 75,
     "논리적 사고": 85,
     "창의적 사고": 92,
     일관성: 78,
