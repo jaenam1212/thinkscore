@@ -1,3 +1,5 @@
+import { isAppRuntime } from "@/lib/platform";
+
 declare global {
   interface Window {
     Kakao: {
@@ -101,7 +103,12 @@ export const kakaoLoginRestAPI = () => {
     process.env.NEXT_PUBLIC_KAKAO_JS_KEY || "2e88ef8df1d85ed606a1c6d423fcdd9a";
   const FRONTEND_URL =
     process.env.NEXT_PUBLIC_FRONTEND_URL || "http://localhost:3000";
-  const REDIRECT_URI = `${FRONTEND_URL}/auth/kakao/callback`;
+  const callbackUrl = `${FRONTEND_URL}/auth/kakao/callback`;
+  const REDIRECT_URI = isAppRuntime()
+    ? `${callbackUrl}?fromApp=1`
+    : callbackUrl;
+
+  sessionStorage.setItem("kakao_redirect_uri", REDIRECT_URI);
 
   const kakaoAuthURL =
     `https://kauth.kakao.com/oauth/authorize?` +

@@ -7,6 +7,8 @@ import StructuredData from "@/components/StructuredData";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import SafeAreaInitializer from "@/components/SafeAreaInitializer";
+import DeepLinkHandler from "@/components/DeepLinkHandler";
+import AdsInitializer from "@/components/ads/AdsInitializer";
 import { ToastProvider } from "@/components/ui/Toast";
 
 const geistSans = Geist({
@@ -142,6 +144,8 @@ export default function RootLayout({
         />
         <StructuredData type="website" />
         <SafeAreaInitializer />
+        <DeepLinkHandler />
+        <AdsInitializer />
         <AuthProvider>{children}</AuthProvider>
         <ToastProvider />
         <Analytics />

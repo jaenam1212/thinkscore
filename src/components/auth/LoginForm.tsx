@@ -4,6 +4,7 @@ import { useState } from "react";
 import KakaoLoginButton from "./KakaoLoginButton";
 import AppleLoginButton from "./AppleLoginButton";
 import { KakaoProfile } from "@/lib/kakao";
+import { isAppRuntime } from "@/lib/platform";
 import { useAuth } from "@/contexts/AuthContext";
 import PrivacyModal from "./PrivacyModal";
 import TermsModal from "./TermsModal";
@@ -59,7 +60,10 @@ export default function LoginForm({
       );
       return;
     }
-    const redirectUri = `${window.location.origin}/auth/google/callback`;
+    const callbackUrl = `${window.location.origin}/auth/google/callback`;
+    const redirectUri = isAppRuntime()
+      ? `${callbackUrl}?fromApp=1`
+      : callbackUrl;
     sessionStorage.setItem("google_redirect_uri", redirectUri);
 
     const state = Math.random().toString(36).substring(2, 15);

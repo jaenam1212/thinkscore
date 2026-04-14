@@ -10,6 +10,8 @@ import ForumQuickShareModal from "./ForumQuickShareModal";
 import { showToast } from "@/components/ui/Toast";
 import { questionService } from "@/lib/services";
 import { Question } from "@/lib/database.types";
+import { adConfig } from "@/lib/ads/config";
+import { showScoreInterstitialAd } from "@/lib/ads/admob";
 import { useAuth } from "@/contexts/AuthContext";
 
 type QuestionListItem = {
@@ -46,6 +48,11 @@ export default function QuizContainer() {
   const [showQuickShareModal, setShowQuickShareModal] = useState(false);
   const [pendingOpenShareModalAfterAuth, setPendingOpenShareModalAfterAuth] =
     useState(false);
+  const [isScoreGateOpen, setIsScoreGateOpen] = useState(false);
+  const [scoreGateLeftSeconds, setScoreGateLeftSeconds] = useState(
+    adConfig.scoreInterstitialDelaySeconds
+  );
+  const totalGateSeconds = Math.max(1, adConfig.scoreInterstitialDelaySeconds);
 
   useEffect(() => {
     const loadTodaysQuestion = async () => {
@@ -116,6 +123,44 @@ export default function QuizContainer() {
     setUserAnswer("");
   };
 
+  const openScoreWithAdGate = async (nextScore: number) => {
+    const shouldGate =
+      adConfig.enabled && adConfig.showScoreInterstitial && !showScore;
+
+    if (!shouldGate) {
+      setScore(nextScore);
+      setShowScore(true);
+      return;
+    }
+
+    const gateSeconds = totalGateSeconds;
+    setIsScoreGateOpen(true);
+    setScoreGateLeftSeconds(gateSeconds);
+
+    const gatePromise = new Promise<void>((resolve) => {
+      let remaining = gateSeconds;
+      const interval = setInterval(() => {
+        remaining -= 1;
+        setScoreGateLeftSeconds(Math.max(0, remaining));
+        if (remaining <= 0) {
+          clearInterval(interval);
+          resolve();
+        }
+      }, 1000);
+    });
+
+    try {
+      await Promise.all([showScoreInterstitialAd(), gatePromise]);
+    } catch (error) {
+      console.error("전면 광고 노출 실패:", error);
+      await gatePromise;
+    } finally {
+      setIsScoreGateOpen(false);
+      setScore(nextScore);
+      setShowScore(true);
+    }
+  };
+
   const handleShareToCommunity = () => {
     if (!currentQuestion) return;
     if (!user) {
@@ -175,6 +220,27 @@ export default function QuizContainer() {
             criteriaScores={evaluation?.criteriaScores}
           />
         )}
+
+      {isScoreGateOpen && (
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-6">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-sm text-center">
+            <p className="text-lg font-semibold text-gray-900 mb-2">
+              점수 확인 전 광고 시청
+            </p>
+            <p className="text-sm text-gray-600 mb-4">
+              {scoreGateLeftSeconds}초 후 결과가 자동으로 열립니다.
+            </p>
+            <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+              <div
+                className="bg-slate-800 h-2 transition-all duration-1000"
+                style={{
+                  width: `${((totalGateSeconds - scoreGateLeftSeconds) / totalGateSeconds) * 100}%`,
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 점수 결과 표시 */}
       {showScore && score !== null && (
@@ -336,10 +402,7 @@ export default function QuizContainer() {
         <AnswerForm
           questionId={currentQuestion.id}
           userId={user?.id || ""}
-          onScoreUpdate={(newScore) => {
-            setScore(newScore);
-            setShowScore(true);
-          }}
+          onScoreUpdate={openScoreWithAdGate}
           onEvaluationComplete={(evaluationResult) => {
             setEvaluation(evaluationResult);
           }}

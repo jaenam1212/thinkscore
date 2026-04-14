@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { isAppRuntime } from "@/lib/platform";
 
 interface AppleLoginButtonProps {
   onSuccess?: () => void;
@@ -57,8 +58,8 @@ export default function AppleLoginButton({
           window.AppleID.auth.init({
             clientId: process.env.NEXT_PUBLIC_APPLE_CLIENT_ID,
             scope: "name email",
-            redirectURI: window.location.origin,
-            usePopup: true,
+            redirectURI: `${window.location.origin}/auth/apple/callback`,
+            usePopup: !isAppRuntime(),
           });
         } catch (error) {
           console.error("Apple ID SDK 초기화 실패:", error);
@@ -100,6 +101,20 @@ export default function AppleLoginButton({
       // 초기화가 안되어 있다면 다시 시도
       let response;
       try {
+        const statePrefix = isAppRuntime() ? "app" : "web";
+        const state = `${statePrefix}_${Math.random().toString(36).slice(2)}`;
+        sessionStorage.setItem("apple_state", state);
+
+        if (process.env.NEXT_PUBLIC_APPLE_CLIENT_ID) {
+          window.AppleID.auth.init({
+            clientId: process.env.NEXT_PUBLIC_APPLE_CLIENT_ID,
+            scope: "name email",
+            redirectURI: `${window.location.origin}/auth/apple/callback`,
+            state,
+            usePopup: !isAppRuntime(),
+          });
+        }
+
         response = await window.AppleID.auth.signIn();
       } catch (initError: unknown) {
         if (initError instanceof Error && initError.message?.includes("init")) {
@@ -108,8 +123,8 @@ export default function AppleLoginButton({
             window.AppleID.auth.init({
               clientId: process.env.NEXT_PUBLIC_APPLE_CLIENT_ID,
               scope: "name email",
-              redirectURI: window.location.origin,
-              usePopup: true,
+              redirectURI: `${window.location.origin}/auth/apple/callback`,
+              usePopup: !isAppRuntime(),
             });
             // 초기화 후 다시 시도
             response = await window.AppleID.auth.signIn();

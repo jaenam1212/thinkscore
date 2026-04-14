@@ -3,6 +3,7 @@ import LeftSidebar from "@/components/layout/LeftSidebar";
 import RightSidebar from "@/components/layout/RightSidebar";
 import BottomNavigation from "@/components/layout/BottomNavigation";
 import AppHeader from "@/components/layout/AppHeader";
+import TopBannerAd from "@/components/ads/TopBannerAd";
 
 export default function Home() {
   return (
@@ -12,6 +13,7 @@ export default function Home() {
 
       {/* 메인 뷰 */}
       <div className="min-h-screen bg-stone-50 flex flex-col w-full   sm:max-w-md lg:max-w-2xl xl:max-w-4xl mx-auto md:border-x md:border-gray-200 relative 2xl:flex-shrink-0">
+        <TopBannerAd />
         {/* 헤더 */}
         <AppHeader title="ThinkScore" subtitle="지능 테스트" />
 

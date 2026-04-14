@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
+import { buildAppReturnUrl } from "@/lib/platform";
 
 function GoogleCallbackContent() {
   const router = useRouter();
@@ -17,6 +18,8 @@ function GoogleCallbackContent() {
         const code = searchParams.get("code");
         const state = searchParams.get("state");
         const errorParam = searchParams.get("error");
+        const fromApp = searchParams.get("fromApp") === "1";
+        const inAppCallback = searchParams.get("inAppCallback") === "1";
 
         const savedState = sessionStorage.getItem("google_state");
         if (state && savedState && state !== savedState) {
@@ -29,6 +32,21 @@ function GoogleCallbackContent() {
         if (errorParam) {
           setError("Google 로그인이 취소되었습니다.");
           setLoading(false);
+          return;
+        }
+
+        // 외부 브라우저에서 OAuth 완료 시 앱으로 먼저 복귀시킨 뒤 앱 WebView에서 콜백을 처리한다.
+        if (fromApp && !inAppCallback) {
+          const appRedirect = new URL(buildAppReturnUrl("google"));
+          if (code) {
+            appRedirect.searchParams.set("code", code);
+          }
+          if (state) {
+            appRedirect.searchParams.set("state", state);
+          }
+          appRedirect.searchParams.set("fromApp", "1");
+          appRedirect.searchParams.set("inAppCallback", "1");
+          window.location.replace(appRedirect.toString());
           return;
         }
 

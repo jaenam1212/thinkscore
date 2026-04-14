@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
-    const { code } = await request.json();
+    const { code, redirectUri: clientRedirectUri } = await request.json();
 
     console.log(
       "카카오 콜백 API 호출됨, code:",
@@ -23,7 +23,8 @@ export async function POST(request: NextRequest) {
       "2e88ef8df1d85ed606a1c6d423fcdd9a";
     const frontendUrl =
       process.env.NEXT_PUBLIC_FRONTEND_URL || "http://localhost:3000";
-    const redirectUri = `${frontendUrl}/auth/kakao/callback`;
+    const redirectUri =
+      clientRedirectUri || `${frontendUrl}/auth/kakao/callback`;
 
     console.log("토큰 교환 파라미터:", {
       client_id: clientId,

@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import UserInfoModal from "@/components/auth/UserInfoModal";
+import { buildAppReturnUrl } from "@/lib/platform";
 
 interface KakaoCallbackProfile {
   id: string;
@@ -41,10 +42,27 @@ function KakaoCallbackContent() {
         const code = searchParams.get("code");
         const state = searchParams.get("state");
         const errorParam = searchParams.get("error");
+        const fromApp = searchParams.get("fromApp") === "1";
+        const inAppCallback = searchParams.get("inAppCallback") === "1";
 
         if (errorParam) {
           setError("카카오 로그인이 취소되었습니다.");
           setLoading(false);
+          return;
+        }
+
+        // 외부 브라우저에서 OAuth 완료 시 앱으로 먼저 복귀시킨 뒤 앱 WebView에서 콜백을 처리한다.
+        if (fromApp && !inAppCallback) {
+          const appRedirect = new URL(buildAppReturnUrl("kakao"));
+          if (code) {
+            appRedirect.searchParams.set("code", code);
+          }
+          if (state) {
+            appRedirect.searchParams.set("state", state);
+          }
+          appRedirect.searchParams.set("fromApp", "1");
+          appRedirect.searchParams.set("inAppCallback", "1");
+          window.location.replace(appRedirect.toString());
           return;
         }
 
@@ -75,12 +93,16 @@ function KakaoCallbackContent() {
         });
 
         // REST API 방식: 백엔드에서 code로 토큰 교환 및 사용자 정보 가져오기
+        const redirectUri =
+          sessionStorage.getItem("kakao_redirect_uri") ||
+          `${window.location.origin}/auth/kakao/callback`;
+
         const response = await fetch("/api/auth/kakao/callback", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ code }),
+          body: JSON.stringify({ code, redirectUri }),
         });
 
         if (!response.ok) {
@@ -96,6 +118,7 @@ function KakaoCallbackContent() {
 
         // 로그인 성공 시 코드를 세션에 저장 (중복 처리 방지)
         sessionStorage.setItem("kakao_processed_code", code);
+        sessionStorage.removeItem("kakao_redirect_uri");
 
         // 먼저 백엔드에서 카카오 로그인 시도
         const backendResponse = await fetch("/api/auth/kakao", {
