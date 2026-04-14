@@ -12,6 +12,7 @@ import { questionService } from "@/lib/services";
 import { Question } from "@/lib/database.types";
 import { adConfig } from "@/lib/ads/config";
 import { showScoreInterstitialAd } from "@/lib/ads/admob";
+import { getAppPlatform } from "@/lib/platform";
 import { useAuth } from "@/contexts/AuthContext";
 
 type QuestionListItem = {
@@ -124,8 +125,14 @@ export default function QuizContainer() {
   };
 
   const openScoreWithAdGate = async (nextScore: number) => {
-    const shouldGate =
-      adConfig.enabled && adConfig.showScoreInterstitial && !showScore;
+    const appPlatform = getAppPlatform();
+    const adEnabled =
+      appPlatform === "ios" ? adConfig.iosEnabled : adConfig.androidEnabled;
+    const scoreInterstitialEnabled =
+      appPlatform === "ios"
+        ? adConfig.iosShowScoreInterstitial
+        : adConfig.androidShowScoreInterstitial;
+    const shouldGate = adEnabled && scoreInterstitialEnabled && !showScore;
 
     if (!shouldGate) {
       setScore(nextScore);

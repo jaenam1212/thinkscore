@@ -4,12 +4,50 @@ import {
   BannerAdSize,
 } from "@capacitor-community/admob";
 import { adConfig } from "@/lib/ads/config";
-import { isAndroidAppRuntime } from "@/lib/platform";
+import { getAppPlatform, isAppRuntime } from "@/lib/platform";
 
 let initialized = false;
 
 const canUseAds = () => {
-  return isAndroidAppRuntime() && adConfig.enabled;
+  const platform = getAppPlatform();
+  if (!isAppRuntime()) {
+    return false;
+  }
+  if (platform === "android") {
+    return adConfig.androidEnabled;
+  }
+  if (platform === "ios") {
+    return adConfig.iosEnabled;
+  }
+  return false;
+};
+
+const getBannerAdUnitId = (): string => {
+  const platform = getAppPlatform();
+  return platform === "ios"
+    ? adConfig.iosBannerAdUnitId
+    : adConfig.androidBannerAdUnitId;
+};
+
+const getInterstitialAdUnitId = (): string => {
+  const platform = getAppPlatform();
+  return platform === "ios"
+    ? adConfig.iosInterstitialAdUnitId
+    : adConfig.androidInterstitialAdUnitId;
+};
+
+const shouldShowTopBanner = (): boolean => {
+  const platform = getAppPlatform();
+  return platform === "ios"
+    ? adConfig.iosShowTopBanner
+    : adConfig.androidShowTopBanner;
+};
+
+const shouldShowScoreInterstitial = (): boolean => {
+  const platform = getAppPlatform();
+  return platform === "ios"
+    ? adConfig.iosShowScoreInterstitial
+    : adConfig.androidShowScoreInterstitial;
 };
 
 export const initializeAdMob = async (): Promise<void> => {
@@ -24,13 +62,13 @@ export const initializeAdMob = async (): Promise<void> => {
 };
 
 export const showTopBannerAd = async (): Promise<void> => {
-  if (!canUseAds() || !adConfig.showTopBanner) {
+  if (!canUseAds() || !shouldShowTopBanner()) {
     return;
   }
 
   await initializeAdMob();
   await AdMob.showBanner({
-    adId: adConfig.bannerAdUnitId,
+    adId: getBannerAdUnitId(),
     adSize: BannerAdSize.ADAPTIVE_BANNER,
     position: BannerAdPosition.TOP_CENTER,
     isTesting: adConfig.useTestAds,
@@ -39,7 +77,7 @@ export const showTopBannerAd = async (): Promise<void> => {
 };
 
 export const removeTopBannerAd = async (): Promise<void> => {
-  if (!isAndroidAppRuntime()) {
+  if (!isAppRuntime()) {
     return;
   }
 
@@ -47,13 +85,13 @@ export const removeTopBannerAd = async (): Promise<void> => {
 };
 
 export const showScoreInterstitialAd = async (): Promise<void> => {
-  if (!canUseAds() || !adConfig.showScoreInterstitial) {
+  if (!canUseAds() || !shouldShowScoreInterstitial()) {
     return;
   }
 
   await initializeAdMob();
   await AdMob.prepareInterstitial({
-    adId: adConfig.interstitialAdUnitId,
+    adId: getInterstitialAdUnitId(),
     isTesting: adConfig.useTestAds,
     immersiveMode: true,
   });

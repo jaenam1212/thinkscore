@@ -20,6 +20,24 @@ export const isAndroidAppRuntime = (): boolean => {
   return /android/i.test(window.navigator.userAgent);
 };
 
+export const isIOSAppRuntime = (): boolean => {
+  if (!isAppRuntime() || typeof window === "undefined") {
+    return false;
+  }
+
+  return /iphone|ipad|ipod/i.test(window.navigator.userAgent);
+};
+
+export const getAppPlatform = (): "android" | "ios" | "web" => {
+  if (isAndroidAppRuntime()) {
+    return "android";
+  }
+  if (isIOSAppRuntime()) {
+    return "ios";
+  }
+  return "web";
+};
+
 export const buildAppReturnUrl = (
   provider: "google" | "kakao" | "apple"
 ): string => {
