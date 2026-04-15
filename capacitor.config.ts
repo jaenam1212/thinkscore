@@ -7,7 +7,6 @@ const config: CapacitorConfig = {
   webDir: "out",
   server: {
     androidScheme: "https",
-    url: "https://www.thinkscore.kr",
     cleartext: false,
   },
   android: {
